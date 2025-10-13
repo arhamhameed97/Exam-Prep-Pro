@@ -1,127 +1,121 @@
 "use client"
 
+import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { BookOpen, Users, Clock, Trophy, TrendingUp, Brain } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-import { BookOpen, Users, Clock, Trophy } from "lucide-react"
 
 export default function Dashboard() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/auth/signin")
-      return
-    }
-  }, [session, status, router])
-
-  if (status === "loading") {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
-  }
+  const { data: session } = useSession()
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">Exam Prep Pro</h1>
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Welcome Header */}
+        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                Welcome back, {session?.user?.name || 'Student'}! 👋
+              </h1>
+              <p className="text-indigo-100 text-lg">
+                Ready to ace your O/A Level exams? Let's get started with your studies.
+              </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">Welcome, {session.user?.name}</span>
-              <button
-                onClick={() => router.push("/api/auth/signout")}
-                className="text-sm text-indigo-600 hover:text-indigo-500"
-              >
-                Sign out
+            <div className="hidden md:block">
+              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center">
+                <Brain className="h-12 w-12 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <BookOpen className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-slate-600">Subjects</p>
+                <p className="text-2xl font-bold text-slate-900">37</p>
+                <p className="text-xs text-slate-500">O/A Level courses</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <Users className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-slate-600">Tests Taken</p>
+                <p className="text-2xl font-bold text-slate-900">0</p>
+                <p className="text-xs text-slate-500">Practice tests</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <Clock className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-slate-600">Study Time</p>
+                <p className="text-2xl font-bold text-slate-900">0h</p>
+                <p className="text-xs text-slate-500">Total hours</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <Trophy className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-slate-600">Average Score</p>
+                <p className="text-2xl font-bold text-slate-900">-</p>
+                <p className="text-xs text-slate-500">Overall performance</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h3>
+            <div className="space-y-3">
+              <button className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                <span className="text-slate-700">Take Practice Test</span>
+                <TrendingUp className="h-5 w-5 text-slate-400" />
+              </button>
+              <button className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                <span className="text-slate-700">View Past Papers</span>
+                <BookOpen className="h-5 w-5 text-slate-400" />
+              </button>
+              <button className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                <span className="text-slate-700">AI Study Assistant</span>
+                <Brain className="h-5 w-5 text-slate-400" />
               </button>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Welcome to Exam Prep Pro! 🎓
-              </h2>
-              <p className="text-gray-600 mb-8">
-                Your AI-powered exam preparation platform. Get ready to ace your exams!
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <div className="flex items-center">
-                    <BookOpen className="h-8 w-8 text-indigo-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-500">Subjects</p>
-                      <p className="text-2xl font-semibold text-gray-900">0</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <div className="flex items-center">
-                    <Users className="h-8 w-8 text-green-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-500">Tests</p>
-                      <p className="text-2xl font-semibold text-gray-900">0</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <div className="flex items-center">
-                    <Clock className="h-8 w-8 text-yellow-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-500">Study Time</p>
-                      <p className="text-2xl font-semibold text-gray-900">0h</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <div className="flex items-center">
-                    <Trophy className="h-8 w-8 text-purple-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-500">Average Score</p>
-                      <p className="text-2xl font-semibold text-gray-900">-</p>
-                    </div>
-                  </div>
-                </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h3>
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-8 w-8 text-slate-400" />
               </div>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Get Started</h3>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
-                    Browse Subjects
-                  </button>
-                  <button className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
-                    Take Practice Test
-                  </button>
-                  <button className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700">
-                    View Past Papers
-                  </button>
-                </div>
-              </div>
+              <p className="text-slate-500">No recent activity</p>
+              <p className="text-sm text-slate-400">Start by taking a practice test</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }
