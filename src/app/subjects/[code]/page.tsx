@@ -2,65 +2,133 @@
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { 
-  BookOpen, 
+  BookOpen,
+  Calculator,
+  Atom,
+  FlaskConical,
+  Dna,
+  Globe,
+  Map,
+  History,
+  Users,
+  FileText,
+  Palette,
+  Music,
+  Camera,
+  Building,
+  TrendingUp,
+  Brain,
   TestTube, 
   Archive, 
   Clock, 
-  TrendingUp, 
   Award,
   Play,
   Download,
-  Brain
+  Utensils,
+  Wrench,
+  Plane,
+  Scale,
+  GraduationCap,
+  Mic,
+  Video,
+  Laptop
 } from "lucide-react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
 
 // Subject data mapping
 const subjectData: Record<string, { name: string; code: string; level: string; description: string; icon: any; color: string }> = {
-  // O-Level subjects
-  "4024": { name: "Mathematics", code: "4024", level: "O-Level", description: "Core Mathematics covering algebra, geometry, and statistics", icon: BookOpen, color: "bg-blue-500" },
-  "4037": { name: "Additional Mathematics", code: "4037", level: "O-Level", description: "Advanced mathematical concepts and problem-solving", icon: BookOpen, color: "bg-blue-600" },
-  "5054": { name: "Physics", code: "5054", level: "O-Level", description: "Fundamental physics principles and applications", icon: BookOpen, color: "bg-purple-500" },
-  "5070": { name: "Chemistry", code: "5070", level: "O-Level", description: "Chemical reactions, atomic structure, and laboratory work", icon: BookOpen, color: "bg-green-500" },
-  "5090": { name: "Biology", code: "5090", level: "O-Level", description: "Living organisms, cells, and biological processes", icon: BookOpen, color: "bg-emerald-500" },
+  // O-Level subjects - Core Subjects
+  "4024": { name: "Mathematics", code: "4024", level: "O-Level", description: "Core Mathematics covering algebra, geometry, and statistics", icon: Calculator, color: "bg-blue-500" },
+  "4037": { name: "Additional Mathematics", code: "4037", level: "O-Level", description: "Advanced mathematical concepts and problem-solving", icon: Calculator, color: "bg-blue-600" },
   "1123": { name: "English Language", code: "1123", level: "O-Level", description: "English language skills and comprehension", icon: BookOpen, color: "bg-red-500" },
-  "2010": { name: "English Literature", code: "2010", level: "O-Level", description: "Literary analysis and critical thinking", icon: BookOpen, color: "bg-red-600" },
-  "2059": { name: "Pakistan Studies", code: "2059", level: "O-Level", description: "History and geography of Pakistan", icon: BookOpen, color: "bg-green-600" },
-  "2058": { name: "Islamiyat", code: "2058", level: "O-Level", description: "Islamic studies and religious education", icon: BookOpen, color: "bg-green-700" },
+  "2010": { name: "English Literature", code: "2010", level: "O-Level", description: "Literary analysis and critical thinking", icon: FileText, color: "bg-red-600" },
   "3248": { name: "Urdu", code: "3248", level: "O-Level", description: "Urdu language and literature", icon: BookOpen, color: "bg-orange-500" },
-  "2217": { name: "Geography", code: "2217", level: "O-Level", description: "Physical and human geography", icon: BookOpen, color: "bg-teal-500" },
-  "2147": { name: "History", code: "2147", level: "O-Level", description: "World history and historical analysis", icon: BookOpen, color: "bg-amber-500" },
-  "2281": { name: "Economics", code: "2281", level: "O-Level", description: "Economic principles and market systems", icon: BookOpen, color: "bg-indigo-500" },
-  "7707": { name: "Accounting", code: "7707", level: "O-Level", description: "Financial accounting and bookkeeping", icon: BookOpen, color: "bg-gray-500" },
-  "2210": { name: "Computer Science", code: "2210", level: "O-Level", description: "Programming and computer fundamentals", icon: BookOpen, color: "bg-cyan-500" },
-  "6090": { name: "Art & Design", code: "6090", level: "O-Level", description: "Creative arts and design principles", icon: BookOpen, color: "bg-pink-500" },
-  "6100": { name: "Music", code: "6100", level: "O-Level", description: "Musical theory and performance", icon: BookOpen, color: "bg-violet-500" },
-  "5016": { name: "Physical Education", code: "5016", level: "O-Level", description: "Sports science and physical fitness", icon: BookOpen, color: "bg-lime-500" },
+  "2059": { name: "Pakistan Studies", code: "2059", level: "O-Level", description: "History and geography of Pakistan", icon: Globe, color: "bg-green-600" },
+  "2058": { name: "Islamiyat", code: "2058", level: "O-Level", description: "Islamic studies and religious education", icon: Globe, color: "bg-green-700" },
   
-  // A-Level subjects
-  "9709": { name: "Mathematics", code: "9709", level: "A-Level", description: "Advanced mathematics including calculus and statistics", icon: BookOpen, color: "bg-blue-500" },
-  "9231": { name: "Further Mathematics", code: "9231", level: "A-Level", description: "Advanced mathematical concepts and applications", icon: BookOpen, color: "bg-blue-600" },
-  "9702": { name: "Physics", code: "9702", level: "A-Level", description: "Advanced physics including quantum mechanics", icon: BookOpen, color: "bg-purple-500" },
-  "9701": { name: "Chemistry", code: "9701", level: "A-Level", description: "Advanced chemistry including organic chemistry", icon: BookOpen, color: "bg-green-500" },
-  "9700": { name: "Biology", code: "9700", level: "A-Level", description: "Advanced biology including molecular biology", icon: BookOpen, color: "bg-emerald-500" },
+  // O-Level subjects - Sciences
+  "5054": { name: "Physics", code: "5054", level: "O-Level", description: "Fundamental physics principles and applications", icon: Atom, color: "bg-purple-500" },
+  "5070": { name: "Chemistry", code: "5070", level: "O-Level", description: "Chemical reactions, atomic structure, and laboratory work", icon: FlaskConical, color: "bg-green-500" },
+  "5090": { name: "Biology", code: "5090", level: "O-Level", description: "Living organisms, cells, and biological processes", icon: Dna, color: "bg-emerald-500" },
+  "2210": { name: "Computer Science", code: "2210", level: "O-Level", description: "Programming and computer fundamentals", icon: Brain, color: "bg-cyan-500" },
+  "5014": { name: "Environmental Management", code: "5014", level: "O-Level", description: "Environmental science and sustainability", icon: Globe, color: "bg-teal-600" },
+  
+  // O-Level subjects - Humanities & Social Sciences
+  "2217": { name: "Geography", code: "2217", level: "O-Level", description: "Physical and human geography", icon: Map, color: "bg-teal-500" },
+  "2147": { name: "History", code: "2147", level: "O-Level", description: "World history and historical analysis", icon: History, color: "bg-amber-500" },
+  "2281": { name: "Economics", code: "2281", level: "O-Level", description: "Economic principles and market systems", icon: TrendingUp, color: "bg-indigo-500" },
+  "7707": { name: "Accounting", code: "7707", level: "O-Level", description: "Financial accounting and bookkeeping", icon: TrendingUp, color: "bg-gray-500" },
+  "7115": { name: "Business Studies", code: "7115", level: "O-Level", description: "Business management and entrepreneurship", icon: Building, color: "bg-slate-500" },
+  "2251": { name: "Sociology", code: "2251", level: "O-Level", description: "Social behavior and societal structures", icon: Users, color: "bg-orange-600" },
+  
+  // O-Level subjects - Languages
+  "3015": { name: "French", code: "3015", level: "O-Level", description: "French language and culture", icon: BookOpen, color: "bg-blue-700" },
+  "3016": { name: "German", code: "3016", level: "O-Level", description: "German language and culture", icon: BookOpen, color: "bg-yellow-600" },
+  "3017": { name: "Spanish", code: "3017", level: "O-Level", description: "Spanish language and culture", icon: BookOpen, color: "bg-red-700" },
+  "3180": { name: "Arabic", code: "3180", level: "O-Level", description: "Arabic language and literature", icon: BookOpen, color: "bg-green-800" },
+  "3205": { name: "Chinese", code: "3205", level: "O-Level", description: "Chinese language and culture", icon: BookOpen, color: "bg-red-800" },
+  
+  // O-Level subjects - Arts & Creative Subjects
+  "6090": { name: "Art & Design", code: "6090", level: "O-Level", description: "Creative arts and design principles", icon: Palette, color: "bg-pink-500" },
+  "6100": { name: "Music", code: "6100", level: "O-Level", description: "Musical theory and performance", icon: Music, color: "bg-violet-500" },
+  "6421": { name: "Drama", code: "6421", level: "O-Level", description: "Theatre arts and dramatic performance", icon: Users, color: "bg-purple-600" },
+  
+  // O-Level subjects - Applied Subjects
+  "6065": { name: "Food & Nutrition", code: "6065", level: "O-Level", description: "Nutritional science and food preparation", icon: Utensils, color: "bg-orange-600" },
+  "6043": { name: "Design & Technology", code: "6043", level: "O-Level", description: "Engineering design and technology", icon: Wrench, color: "bg-gray-600" },
+  "5016": { name: "Physical Education", code: "5016", level: "O-Level", description: "Sports science and physical fitness", icon: Users, color: "bg-lime-500" },
+  "7096": { name: "Travel & Tourism", code: "7096", level: "O-Level", description: "Tourism industry and travel management", icon: Plane, color: "bg-cyan-600" },
+  
+  // A-Level subjects - Core Sciences
+  "9709": { name: "Mathematics", code: "9709", level: "A-Level", description: "Advanced mathematics including calculus and statistics", icon: Calculator, color: "bg-blue-500" },
+  "9231": { name: "Further Mathematics", code: "9231", level: "A-Level", description: "Advanced mathematical concepts and applications", icon: Calculator, color: "bg-blue-600" },
+  "9702": { name: "Physics", code: "9702", level: "A-Level", description: "Advanced physics including quantum mechanics", icon: Atom, color: "bg-purple-500" },
+  "9701": { name: "Chemistry", code: "9701", level: "A-Level", description: "Advanced chemistry including organic chemistry", icon: FlaskConical, color: "bg-green-500" },
+  "9700": { name: "Biology", code: "9700", level: "A-Level", description: "Advanced biology including molecular biology", icon: Dna, color: "bg-emerald-500" },
+  "9608": { name: "Computer Science", code: "9608", level: "A-Level", description: "Advanced programming and computer systems", icon: Brain, color: "bg-cyan-500" },
+  "9693": { name: "Environmental Science", code: "9693", level: "A-Level", description: "Environmental science and sustainability", icon: Globe, color: "bg-teal-600" },
+  "9990": { name: "Psychology", code: "9990", level: "A-Level", description: "Human behavior and mental processes", icon: Brain, color: "bg-rose-500" },
+  
+  // A-Level subjects - Humanities & Social Sciences
   "9093": { name: "English Language", code: "9093", level: "A-Level", description: "Advanced English language and linguistics", icon: BookOpen, color: "bg-red-500" },
-  "9695": { name: "English Literature", code: "9695", level: "A-Level", description: "Advanced literary analysis and criticism", icon: BookOpen, color: "bg-red-600" },
-  "9488": { name: "Pakistan Studies", code: "9488", level: "A-Level", description: "Advanced study of Pakistan's history and culture", icon: BookOpen, color: "bg-green-600" },
-  "9696": { name: "Geography", code: "9696", level: "A-Level", description: "Advanced geography and environmental studies", icon: BookOpen, color: "bg-teal-500" },
-  "9489": { name: "History", code: "9489", level: "A-Level", description: "Advanced historical research and analysis", icon: BookOpen, color: "bg-amber-500" },
-  "9708": { name: "Economics", code: "9708", level: "A-Level", description: "Advanced economics and economic theory", icon: BookOpen, color: "bg-indigo-500" },
-  "9706": { name: "Accounting", code: "9706", level: "A-Level", description: "Advanced accounting and financial management", icon: BookOpen, color: "bg-gray-500" },
-  "9609": { name: "Business Studies", code: "9609", level: "A-Level", description: "Business management and entrepreneurship", icon: BookOpen, color: "bg-slate-500" },
-  "9608": { name: "Computer Science", code: "9608", level: "A-Level", description: "Advanced programming and computer systems", icon: BookOpen, color: "bg-cyan-500" },
-  "9990": { name: "Psychology", code: "9990", level: "A-Level", description: "Human behavior and mental processes", icon: BookOpen, color: "bg-rose-500" },
-  "9699": { name: "Sociology", code: "9699", level: "A-Level", description: "Social behavior and societal structures", icon: BookOpen, color: "bg-orange-500" },
-  "9479": { name: "Art & Design", code: "9479", level: "A-Level", description: "Advanced art theory and creative practice", icon: BookOpen, color: "bg-pink-500" },
-  "9483": { name: "Music", code: "9483", level: "A-Level", description: "Advanced music theory and composition", icon: BookOpen, color: "bg-violet-500" },
-  "9486": { name: "Photography", code: "9486", level: "A-Level", description: "Digital and film photography techniques", icon: BookOpen, color: "bg-stone-500" },
+  "9695": { name: "English Literature", code: "9695", level: "A-Level", description: "Advanced literary analysis and criticism", icon: FileText, color: "bg-red-600" },
+  "9488": { name: "Pakistan Studies", code: "9488", level: "A-Level", description: "Advanced study of Pakistan's history and culture", icon: Globe, color: "bg-green-600" },
+  "9696": { name: "Geography", code: "9696", level: "A-Level", description: "Advanced geography and environmental studies", icon: Map, color: "bg-teal-500" },
+  "9489": { name: "History", code: "9489", level: "A-Level", description: "Advanced historical research and analysis", icon: History, color: "bg-amber-500" },
+  "9708": { name: "Economics", code: "9708", level: "A-Level", description: "Advanced economics and economic theory", icon: TrendingUp, color: "bg-indigo-500" },
+  "9706": { name: "Accounting", code: "9706", level: "A-Level", description: "Advanced accounting and financial management", icon: TrendingUp, color: "bg-gray-500" },
+  "9609": { name: "Business Studies", code: "9609", level: "A-Level", description: "Business management and entrepreneurship", icon: Building, color: "bg-slate-500" },
+  "9699": { name: "Sociology", code: "9699", level: "A-Level", description: "Social behavior and societal structures", icon: Users, color: "bg-orange-500" },
+  "9084": { name: "Law", code: "9084", level: "A-Level", description: "Legal principles and jurisprudence", icon: Scale, color: "bg-slate-600" },
+  "9698": { name: "Political Science", code: "9698", level: "A-Level", description: "Political systems and governance", icon: GraduationCap, color: "bg-blue-700" },
+  "9704": { name: "Philosophy", code: "9704", level: "A-Level", description: "Critical thinking and philosophical inquiry", icon: Brain, color: "bg-purple-700" },
+  
+  // A-Level subjects - Languages
+  "9716": { name: "French", code: "9716", level: "A-Level", description: "Advanced French language and culture", icon: BookOpen, color: "bg-blue-700" },
+  "9717": { name: "German", code: "9717", level: "A-Level", description: "Advanced German language and culture", icon: BookOpen, color: "bg-yellow-600" },
+  "9719": { name: "Spanish", code: "9719", level: "A-Level", description: "Advanced Spanish language and culture", icon: BookOpen, color: "bg-red-700" },
+  "9680": { name: "Arabic", code: "9680", level: "A-Level", description: "Advanced Arabic language and literature", icon: BookOpen, color: "bg-green-800" },
+  "9715": { name: "Chinese", code: "9715", level: "A-Level", description: "Advanced Chinese language and culture", icon: BookOpen, color: "bg-red-800" },
+  "9686": { name: "Urdu", code: "9686", level: "A-Level", description: "Advanced Urdu language and literature", icon: BookOpen, color: "bg-orange-500" },
+  
+  // A-Level subjects - Arts & Creative Subjects
+  "9479": { name: "Art & Design", code: "9479", level: "A-Level", description: "Advanced art theory and creative practice", icon: Palette, color: "bg-pink-500" },
+  "9483": { name: "Music", code: "9483", level: "A-Level", description: "Advanced music theory and composition", icon: Music, color: "bg-violet-500" },
+  "9482": { name: "Drama and Theatre Studies", code: "9482", level: "A-Level", description: "Advanced theatre arts and dramatic performance", icon: Mic, color: "bg-purple-600" },
+  "9486": { name: "Photography", code: "9486", level: "A-Level", description: "Digital and film photography techniques", icon: Camera, color: "bg-stone-500" },
+  
+  // A-Level subjects - Applied & Professional Subjects
+  "9607": { name: "Media Studies", code: "9607", level: "A-Level", description: "Media analysis and production", icon: Video, color: "bg-indigo-600" },
+  "9626": { name: "Information Technology", code: "9626", level: "A-Level", description: "IT systems and digital technologies", icon: Laptop, color: "bg-cyan-600" },
+  "9705": { name: "Design and Technology", code: "9705", level: "A-Level", description: "Engineering design and innovation", icon: Wrench, color: "bg-gray-600" },
+  "9396": { name: "Physical Education", code: "9396", level: "A-Level", description: "Sports science and physical fitness", icon: Users, color: "bg-lime-500" },
+  "9395": { name: "Travel and Tourism", code: "9395", level: "A-Level", description: "Tourism industry and travel management", icon: Plane, color: "bg-cyan-600" },
 }
 
 export default function SubjectPage() {
   const params = useParams()
+  const router = useRouter()
   const code = params.code as string
   const subject = subjectData[code]
   const [activeTab, setActiveTab] = useState('overview')
@@ -102,9 +170,12 @@ export default function SubjectPage() {
               </div>
             </div>
             <div className="flex space-x-3">
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+              <button 
+                onClick={() => router.push(`/subjects/${code}/generate-test`)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
                 <Play className="h-4 w-4 inline mr-2" />
-                Start Test
+                Generate AI Test
               </button>
               <button className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
                 <Download className="h-4 w-4 inline mr-2" />
@@ -188,10 +259,43 @@ export default function SubjectPage() {
             )}
 
             {activeTab === 'tests' && (
-              <div className="text-center py-12">
-                <TestTube className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No Tests Available Yet</h3>
-                <p className="text-slate-600">Practice tests for this subject will be available soon.</p>
+              <div className="space-y-6">
+                <div className="text-center py-8">
+                  <TestTube className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Generate Your First Test</h3>
+                  <p className="text-slate-600 mb-6">Create a custom practice test tailored to your needs using AI.</p>
+                  <button 
+                    onClick={() => router.push(`/subjects/${code}/generate-test`)}
+                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 mx-auto"
+                  >
+                    <Brain className="h-4 w-4" />
+                    <span>Generate AI Test</span>
+                  </button>
+                </div>
+                
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <Brain className="h-6 w-6 text-indigo-600" />
+                    <h4 className="text-lg font-semibold text-slate-900">AI-Powered Test Generation</h4>
+                  </div>
+                  <p className="text-slate-700 mb-4">
+                    Our AI will create high-quality questions based on your selected topics, difficulty level, and curriculum requirements.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                      <span className="text-slate-600">Customizable difficulty</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                      <span className="text-slate-600">Topic-specific questions</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                      <span className="text-slate-600">Detailed explanations</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

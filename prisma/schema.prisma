@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -68,7 +68,7 @@ model Subject {
   name        String
   description String?
   level       String   @default("O-Level")
-  code        String   @unique
+  code        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -77,20 +77,24 @@ model Subject {
 
   tests Test[]
 
+  @@unique([code, userId])
   @@map("subjects")
 }
 
 model Test {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  type        String   @default("practice") // practice, mock, past-paper
-  difficulty  String   @default("medium")   // easy, medium, hard
-  duration    Int      @default(60)         // minutes
-  totalMarks  Int      @default(100)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  type          String   @default("practice") // practice, mock, past-paper
+  difficulty    String   @default("medium")   // easy, medium, hard
+  duration      Int      @default(60)         // minutes
+  totalMarks    Int      @default(100)
+  isActive      Boolean  @default(true)
+  isAIGenerated Boolean  @default(false)      // true for AI-generated tests
+  topics        String?                       // JSON string of selected topics
+  questionTypes String?                       // JSON string of selected question types
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   subjectId String
   subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -98,7 +102,8 @@ model Test {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  attempts TestAttempt[]
+  questions Question[]
+  attempts  TestAttempt[]
 
   @@map("tests")
 }
@@ -118,6 +123,25 @@ model TestAttempt {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("test_attempts")
+}
+
+model Question {
+  id            String   @id @default(cuid())
+  questionText  String
+  options       String   // JSON string of answer options
+  correctAnswer String   // The correct answer (A, B, C, D, etc.)
+  explanation   String?  // Explanation for the correct answer
+  marks         Int      @default(1)
+  difficulty    String   @default("medium") // easy, medium, hard
+  topic         String?  // Topic or chapter this question belongs to
+  questionType  String   @default("mcq")    // mcq, short-answer, long-answer, essay, true-false, fill-blanks
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  testId String
+  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@map("questions")
 }
 
 model PastPaper {
