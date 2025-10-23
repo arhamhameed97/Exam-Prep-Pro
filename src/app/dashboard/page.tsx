@@ -1,6 +1,6 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { BookOpen, Users, Clock, Trophy, TrendingUp, Brain, Target, Zap, Award, Calendar, BarChart3, Star } from "lucide-react"
-import { getServerSession } from "next-auth"
+import { BookOpen, Users, Clock, Trophy, TrendingUp, Brain, Target, Zap, Award, BarChart3, Star } from "lucide-react"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
@@ -207,7 +207,7 @@ export default async function Dashboard() {
                       Welcome back, {session.user.name || 'Student'}! 👋
                     </h1>
                     <p className="text-white/90 text-sm lg:text-base">
-                      Ready to ace your O/A Level exams? Let's track your progress and achieve excellence.
+                      Ready to ace your O/A Level exams? Let&apos;s track your progress and achieve excellence.
                     </p>
                   </div>
                 </div>

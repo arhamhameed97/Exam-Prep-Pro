@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { TestGenerationRequest } from '@/types/test'
-import { AI_CONFIG, QUESTION_SCHEMA } from './ai-config'
+import { AI_CONFIG } from './ai-config'
 import { getCachedQuestions, setCachedQuestions } from './question-cache'
 import { trackApiUsage } from './token-tracker'
 

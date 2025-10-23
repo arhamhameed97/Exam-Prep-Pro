@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { tokenTracker } from "@/lib/token-tracker"
 import { getCacheStats } from "@/lib/question-cache"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function generateRecommendations(usageStats: any, cacheStats: any): string[] {
+function generateRecommendations(usageStats: { daily: { tokens: number }, weekly: { tokens: number }, monthly: { tokens: number } }, cacheStats: { hitRate: number, totalRequests: number }): string[] {
   const recommendations = []
 
   if (usageStats.daily.tokens > 50000) {

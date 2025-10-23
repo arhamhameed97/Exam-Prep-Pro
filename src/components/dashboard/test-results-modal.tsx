@@ -7,11 +7,9 @@ import {
   BookOpen, 
   RotateCcw, 
   Eye,
-  CheckCircle,
-  XCircle,
   AlertCircle
 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 
 interface TestAttempt {
@@ -63,9 +61,9 @@ export default function TestResultsModal({ isOpen, onClose, attemptId }: TestRes
     if (isOpen && attemptId) {
       fetchAttemptData()
     }
-  }, [isOpen, attemptId])
+  }, [isOpen, attemptId, fetchAttemptData])
 
-  const fetchAttemptData = async () => {
+  const fetchAttemptData = useCallback(async () => {
     try {
       setLoading(true)
       setError('')
@@ -89,7 +87,7 @@ export default function TestResultsModal({ isOpen, onClose, attemptId }: TestRes
     } finally {
       setLoading(false)
     }
-  }
+  }, [attemptId])
 
   const formatTime = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`

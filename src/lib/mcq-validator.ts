@@ -1,4 +1,5 @@
 import { createCipher, createDecipher } from 'crypto'
+import { Question } from '@/types/test'
 
 export interface MCQValidationResult {
   isCorrect: boolean
@@ -53,7 +54,7 @@ export function decryptAnswer(encryptedAnswer: string): string {
 /**
  * Prepare question data for client-side with encrypted answers
  */
-export function prepareSecureQuestionData(question: any): SecureQuestionData {
+export function prepareSecureQuestionData(question: Question): SecureQuestionData {
   return {
     id: question.id,
     questionText: question.questionText,

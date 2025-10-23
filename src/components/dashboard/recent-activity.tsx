@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { 
   Clock, 
   Trophy, 
@@ -11,7 +12,6 @@ import {
   XCircle,
   Star,
   Calendar,
-  Timer,
   Award,
   Brain,
   Zap,
@@ -123,13 +123,13 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
           </div>
           <h4 className="text-sm font-medium text-slate-900 mb-1">No Recent Activity</h4>
           <p className="text-xs text-slate-500 mb-3">Start your learning journey</p>
-          <a 
+          <Link 
             href="/subjects" 
             className="inline-flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-xs"
           >
             <Zap className="h-3 w-3" />
             <span>Take a Test</span>
-          </a>
+          </Link>
         </div>
       </div>
     )
@@ -142,16 +142,16 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
           <Clock className="h-5 w-5 text-slate-600" />
           <span>Recent Activity</span>
         </h3>
-        <a 
+        <Link 
           href="/tests" 
           className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
         >
           View All
-        </a>
+        </Link>
       </div>
 
       <div className="space-y-3">
-        {attempts.slice(0, 3).map((attempt, index) => {
+        {attempts.slice(0, 3).map((attempt) => {
           const trend = getPerformanceTrend(Math.round((attempt.score / attempt.test.totalMarks) * 100))
           const TrendIcon = trend.icon
           
@@ -256,13 +256,13 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
       <div className="mt-4 pt-3 border-t border-slate-200">
         <div className="flex items-center justify-between text-xs text-slate-600">
           <span>Showing {Math.min(attempts.length, 3)} recent</span>
-          <a 
+          <Link 
             href="/tests" 
             className="flex items-center space-x-1 text-indigo-600 hover:text-indigo-700 font-medium"
           >
             <span>View All</span>
             <ChevronRight className="h-3 w-3" />
-          </a>
+          </Link>
         </div>
       </div>
       
