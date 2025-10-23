@@ -226,17 +226,17 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
           {/* Search */}
-          <div className="relative w-full sm:w-auto">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search subjects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm w-full sm:w-auto"
+              className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
             />
           </div>
 
@@ -244,7 +244,7 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm w-full sm:w-auto"
+            className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
           >
             <option value="recent">Most Recent</option>
             <option value="performance">Best Performance</option>
@@ -277,7 +277,7 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
       {/* Subjects Grid/List */}
       <div className={
         viewMode === 'grid' 
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
           : 'space-y-3'
       }>
         {filteredSubjects.map((subject) => {
@@ -286,121 +286,121 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
           return (
             <div
               key={subject.id}
-              className={`group relative p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
+              className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
                 hoveredSubject === subject.id 
-                  ? 'border-indigo-200 bg-indigo-50' 
-                  : 'border-slate-100 bg-slate-50 hover:border-slate-200'
+                  ? 'border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-lg' 
+                  : 'border-slate-100 bg-gradient-to-br from-white to-slate-50 hover:border-indigo-200'
               }`}
               onMouseEnter={() => setHoveredSubject(subject.id)}
               onMouseLeave={() => setHoveredSubject(null)}
             >
               {/* Header */}
-              <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg ${subject.color} text-white`}>
-                    <BookOpen className="h-5 w-5" />
+                  <div className={`p-3 rounded-xl ${subject.color} text-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                    <BookOpen className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 group-hover:text-indigo-700 transition-colors">
+                    <h4 className="font-bold text-slate-900 text-lg group-hover:text-indigo-700 transition-colors">
                       {subject.name}
                     </h4>
-                    <p className="text-sm text-slate-600">{subject.code} • {subject.level}</p>
+                    <p className="text-sm text-slate-600 font-medium">{subject.code} • {subject.level}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => toggleFavorite(subject.id)}
-                    className={`p-1 rounded-md transition-colors ${
+                    className={`p-2 rounded-lg transition-all duration-300 ${
                       subject.isFavorite 
-                        ? 'text-yellow-500 hover:text-yellow-600' 
-                        : 'text-slate-400 hover:text-yellow-500'
+                        ? 'text-yellow-500 hover:text-yellow-600 bg-yellow-50 hover:bg-yellow-100' 
+                        : 'text-slate-400 hover:text-yellow-500 hover:bg-yellow-50'
                     }`}
                   >
                     <Star className={`h-4 w-4 ${subject.isFavorite ? 'fill-current' : ''}`} />
                   </button>
-                  <button className="p-1 rounded-md text-slate-400 hover:text-slate-600 transition-colors">
+                  <button className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-300">
                     <MoreVertical className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
               {/* Performance Indicator */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600">Overall Performance</span>
-                  <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getPerformanceColor(subject.performance)}`}>
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-slate-700">Overall Performance</span>
+                  <div className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-full text-xs font-bold ${getPerformanceColor(subject.performance)} shadow-sm`}>
                     <PerformanceIcon className="h-3 w-3" />
                     <span className="capitalize">{subject.performance.replace('-', ' ')}</span>
                   </div>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-2">
+                <div className="w-full bg-slate-200 rounded-full h-3 shadow-inner">
                   <div 
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      subject.averageScore >= 80 ? 'bg-gradient-to-r from-green-400 to-green-500' :
-                      subject.averageScore >= 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
-                      'bg-gradient-to-r from-red-400 to-red-500'
+                    className={`h-3 rounded-full transition-all duration-700 ${
+                      subject.averageScore >= 80 ? 'bg-gradient-to-r from-green-400 via-green-500 to-green-600' :
+                      subject.averageScore >= 60 ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600' :
+                      'bg-gradient-to-r from-red-400 via-red-500 to-red-600'
                     }`}
                     style={{ width: `${subject.averageScore}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-xs text-slate-600 mt-1">
+                <div className="flex justify-between text-xs text-slate-600 mt-2 font-medium">
                   <span>Avg: {subject.averageScore.toFixed(1)}%</span>
                   <span>Best: {subject.bestScore.toFixed(1)}%</span>
                 </div>
               </div>
 
               {/* Stats Grid */}
-              <div className={`grid gap-3 mb-4 ${
+              <div className={`grid gap-3 mb-5 ${
                 viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-4'
               }`}>
-                <div className="text-center p-2 bg-white rounded-lg">
-                  <div className="text-lg font-semibold text-slate-900">{subject.totalTests}</div>
-                  <div className="text-xs text-slate-600">Tests</div>
+                <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                  <div className="text-xl font-bold text-slate-900">{subject.totalTests}</div>
+                  <div className="text-xs text-slate-600 font-medium">Tests</div>
                 </div>
-                <div className="text-center p-2 bg-white rounded-lg">
-                  <div className="text-lg font-semibold text-slate-900">{formatTime(subject.totalTimeSpent)}</div>
-                  <div className="text-xs text-slate-600">Time Spent</div>
+                <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                  <div className="text-xl font-bold text-slate-900">{formatTime(subject.totalTimeSpent)}</div>
+                  <div className="text-xs text-slate-600 font-medium">Time Spent</div>
                 </div>
                 {viewMode === 'list' && (
                   <>
-                    <div className="text-center p-2 bg-white rounded-lg">
-                      <div className="text-lg font-semibold text-slate-900">{subject.recentActivity}</div>
-                      <div className="text-xs text-slate-600">This Week</div>
+                    <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                      <div className="text-xl font-bold text-slate-900">{subject.recentActivity}</div>
+                      <div className="text-xs text-slate-600 font-medium">This Week</div>
                     </div>
-                    <div className="text-center p-2 bg-white rounded-lg">
-                      <div className="text-lg font-semibold text-slate-900">{formatDate(subject.lastAccessed)}</div>
-                      <div className="text-xs text-slate-600">Last Accessed</div>
+                    <div className="text-center p-3 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                      <div className="text-xl font-bold text-slate-900">{formatDate(subject.lastAccessed)}</div>
+                      <div className="text-xs text-slate-600 font-medium">Last Accessed</div>
                     </div>
                   </>
                 )}
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-between pt-3 border-t border-slate-200">
-                <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                <div className="flex items-center space-x-3">
                   <Link
                     href={`/subjects/${subject.code}`}
-                    className="inline-flex items-center space-x-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                    className="inline-flex items-center space-x-1 text-sm text-indigo-600 hover:text-indigo-700 font-semibold px-3 py-2 rounded-lg hover:bg-indigo-50 transition-all duration-300"
                   >
                     <Eye className="h-4 w-4" />
                     <span>View</span>
                   </Link>
                   <Link
                     href={`/subjects/${subject.code}/generate-test`}
-                    className="inline-flex items-center space-x-1 text-sm text-green-600 hover:text-green-700 font-medium"
+                    className="inline-flex items-center space-x-1 text-sm text-green-600 hover:text-green-700 font-semibold px-3 py-2 rounded-lg hover:bg-green-50 transition-all duration-300"
                   >
                     <Play className="h-4 w-4" />
                     <span>Practice</span>
                   </Link>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 transition-all duration-300 group-hover:translate-x-1" />
               </div>
 
               {/* Hover Effect Indicator */}
               {hoveredSubject === subject.id && (
-                <div className="absolute top-2 right-2">
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+                <div className="absolute top-3 right-3">
+                  <div className="w-3 h-3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse shadow-lg" />
                 </div>
               )}
             </div>

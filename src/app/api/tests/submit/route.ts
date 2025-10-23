@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
       data: {
         score: parseFloat(score),
         grade,
-        timeSpent: parseInt(timeSpent),
+        timeSpent: Math.round(parseInt(timeSpent) / 60), // Convert seconds to minutes
+        answers: JSON.stringify(answers), // Store user's answers as JSON
         status: 'completed',
         testId,
         userId: session.user.id

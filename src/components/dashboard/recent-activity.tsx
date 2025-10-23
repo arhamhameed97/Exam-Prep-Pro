@@ -18,6 +18,7 @@ import {
   ChevronRight
 } from "lucide-react"
 import { useState } from "react"
+import TestResultsModal from "./test-results-modal"
 
 interface TestAttempt {
   id: string
@@ -46,6 +47,8 @@ interface RecentActivityProps {
 
 export default function RecentActivity({ attempts }: RecentActivityProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
@@ -95,6 +98,16 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
     if (score >= 80) return { icon: TrendingUp, color: 'text-green-500', text: 'Excellent' }
     if (score >= 60) return { icon: Target, color: 'text-blue-500', text: 'Good' }
     return { icon: TrendingDown, color: 'text-red-500', text: 'Needs Work' }
+  }
+
+  const handleViewResults = (attemptId: string) => {
+    setSelectedAttemptId(attemptId)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedAttemptId(null)
   }
 
   if (attempts.length === 0) {
@@ -158,14 +171,8 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-1 mb-1">
                     <h4 className="font-medium text-slate-900 text-sm truncate group-hover:text-indigo-700 transition-colors">
-                      {attempt.test.title.length > 20 ? `${attempt.test.title.substring(0, 20)}...` : attempt.test.title}
+                      {attempt.test.title.length > 35 ? `${attempt.test.title.substring(0, 35)}...` : attempt.test.title}
                     </h4>
-                    {attempt.test.isAIGenerated && (
-                      <div className="flex items-center space-x-0.5 px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                        <Brain className="h-2.5 w-2.5" />
-                        <span>AI</span>
-                      </div>
-                    )}
                   </div>
                   <div className="flex items-center space-x-2 text-xs text-slate-600">
                     <span className="flex items-center space-x-0.5">
@@ -225,13 +232,13 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
               {/* Compact Footer */}
               <div className="flex items-center justify-between pt-2 border-t border-slate-200">
                 <span className="text-xs text-slate-500">{formatDate(attempt.completedAt)}</span>
-                <a 
-                  href={`/tests/${attempt.test.id}`}
+                <button 
+                  onClick={() => handleViewResults(attempt.id)}
                   className="inline-flex items-center space-x-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium"
                 >
-                  <span>View</span>
+                  <span>View Results</span>
                   <ChevronRight className="h-3 w-3" />
-                </a>
+                </button>
               </div>
 
               {/* Hover Effect Indicator */}
@@ -258,6 +265,12 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
           </a>
         </div>
       </div>
+      
+      <TestResultsModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        attemptId={selectedAttemptId || ''}
+      />
     </div>
   )
 }

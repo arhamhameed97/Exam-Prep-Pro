@@ -69,11 +69,22 @@ export default function TestPage() {
   const [testResult, setTestResult] = useState<TestResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [viewResultsAttemptId, setViewResultsAttemptId] = useState<string | null>(null)
 
   // Load test data
   useEffect(() => {
     loadTestData()
   }, [testId])
+
+  // Check for viewResults query parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const attemptId = urlParams.get('viewResults')
+    if (attemptId) {
+      setViewResultsAttemptId(attemptId)
+      loadAttemptResults(attemptId)
+    }
+  }, [])
 
   // Timer effect
   useEffect(() => {
@@ -136,6 +147,7 @@ export default function TestPage() {
 
       setTest(fetchedTest)
       setTimeLeft(fetchedTest.duration * 60) // Convert minutes to seconds
+      setIsTimerRunning(true) // Start timer automatically
       
       // Prepare secure questions with encrypted answers
       const secure = fetchedTest.questions.map(prepareSecureQuestionData)
@@ -146,6 +158,59 @@ export default function TestPage() {
       setError('Failed to load test. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadAttemptResults = async (attemptId: string) => {
+    try {
+      const response = await fetch(`/api/tests/attempts/${attemptId}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to load test attempt')
+      }
+      
+      const data = await response.json()
+      
+      if (data.success && data.attempt) {
+        // Set the test data from the attempt
+        const attemptTest: Test = {
+          id: data.attempt.test.id,
+          title: data.attempt.test.title,
+          description: data.attempt.test.description,
+          duration: data.attempt.test.duration,
+          totalMarks: data.attempt.test.totalMarks,
+          difficulty: data.attempt.test.difficulty,
+          questions: data.attempt.test.questions
+        }
+        
+        setTest(attemptTest)
+        
+        // Set the user's answers from the attempt
+        if (data.attempt.answers) {
+          setAnswers(data.attempt.answers)
+        }
+        
+        // Prepare secure questions
+        const secure = attemptTest.questions.map(prepareSecureQuestionData)
+        setSecureQuestions(secure)
+        
+        // Set the test result from the attempt
+        const result: TestResult = {
+          score: data.attempt.score,
+          totalMarks: data.attempt.test.totalMarks,
+          correctAnswers: Math.round((data.attempt.score / data.attempt.test.totalMarks) * data.attempt.test.questions.length),
+          totalQuestions: data.attempt.test.questions.length,
+          timeSpent: data.attempt.timeSpent * 60, // Convert minutes to seconds
+          grade: data.attempt.grade
+        }
+        
+        setTestResult(result)
+        setIsTestCompleted(true)
+        setIsTimerRunning(false)
+      }
+    } catch (error) {
+      console.error('Error loading attempt results:', error)
+      setError('Failed to load test results. Please try again.')
     }
   }
 
@@ -186,7 +251,7 @@ export default function TestPage() {
     else if (percentage >= 60) grade = 'C'
     else if (percentage >= 50) grade = 'D'
 
-    const timeSpent = test ? (test.duration * 60) - timeLeft : 0
+    const timeSpent = test ? Math.max(0, (test.duration * 60) - timeLeft) : 0
 
     const testResult = {
       ...result,
@@ -235,6 +300,11 @@ export default function TestPage() {
     setIsTimerRunning(false)
     setIsTestCompleted(false)
     setTestResult(null)
+    setViewResultsAttemptId(null)
+    // Clear the viewResults query parameter
+    const url = new URL(window.location.href)
+    url.searchParams.delete('viewResults')
+    window.history.replaceState({}, '', url.toString())
   }
 
   const formatTime = (seconds: number) => {

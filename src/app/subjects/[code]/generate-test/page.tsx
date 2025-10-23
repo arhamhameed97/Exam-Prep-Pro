@@ -34,7 +34,20 @@ import {
   Laptop,
   ArrowLeft,
   Settings,
-  Zap
+  Zap,
+  CheckSquare,
+  Square,
+  Sparkles,
+  Target,
+  Timer,
+  BarChart3,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Filter,
+  Star,
+  Lightbulb
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -151,6 +164,10 @@ export default function GenerateTestPage() {
   const [availableTopics, setAvailableTopics] = useState<string[]>([])
   const [availableQuestionTypes, setAvailableQuestionTypes] = useState<QuestionType[]>([])
   const [error, setError] = useState('')
+  const [topicSearchQuery, setTopicSearchQuery] = useState('')
+  const [isTopicsExpanded, setIsTopicsExpanded] = useState(true)
+  const [isQuestionTypesExpanded, setIsQuestionTypesExpanded] = useState(true)
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
 
   useEffect(() => {
     if (subject) {
@@ -208,6 +225,41 @@ export default function GenerateTestPage() {
     }))
   }
 
+  const handleSelectAllTopics = () => {
+    const filteredTopics = availableTopics.filter(topic => 
+      topic.toLowerCase().includes(topicSearchQuery.toLowerCase())
+    )
+    setConfig(prev => ({
+      ...prev,
+      topics: filteredTopics
+    }))
+  }
+
+  const handleDeselectAllTopics = () => {
+    setConfig(prev => ({
+      ...prev,
+      topics: []
+    }))
+  }
+
+  const handleSelectAllQuestionTypes = () => {
+    setConfig(prev => ({
+      ...prev,
+      questionTypes: availableQuestionTypes
+    }))
+  }
+
+  const handleDeselectAllQuestionTypes = () => {
+    setConfig(prev => ({
+      ...prev,
+      questionTypes: []
+    }))
+  }
+
+  const filteredTopics = availableTopics.filter(topic => 
+    topic.toLowerCase().includes(topicSearchQuery.toLowerCase())
+  )
+
   const handleGenerate = async () => {
     if (config.topics.length === 0) {
       setError('Please select at least one topic')
@@ -255,233 +307,342 @@ export default function GenerateTestPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-slate-600" />
-            </button>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Generate AI Test</h1>
-              <p className="text-slate-600 mt-1">Create a custom practice test using AI</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Subject Info */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center space-x-4">
-            <div className={`p-4 rounded-xl ${subject.color}`}>
-              <IconComponent className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">{subject.name}</h2>
-              <div className="flex items-center space-x-4 mt-1">
-                <span className="text-lg text-slate-600">{subject.code}</span>
-                <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
-                  {subject.level}
-                </span>
+      <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
+        <div className="h-full flex flex-col p-4 space-y-4">
+          {/* Compact Header */}
+          <div className="relative overflow-hidden flex-shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 opacity-10 rounded-2xl"></div>
+            <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => router.back()}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-all duration-200"
+                  >
+                    <ArrowLeft className="h-5 w-5 text-slate-600" />
+                  </button>
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-3 rounded-xl ${subject.color} shadow-md`}>
+                      <IconComponent className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                        Generate AI Test
+                      </h1>
+                      <p className="text-slate-600 text-sm">Create a custom practice test using AI</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full">
+                  <Sparkles className="h-4 w-4 text-indigo-600" />
+                  <span className="text-xs font-medium text-indigo-700">AI Powered</span>
+                </div>
               </div>
-              <p className="text-slate-600 mt-2">{subject.description}</p>
             </div>
           </div>
-        </div>
 
-        {/* Configuration Form */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center space-x-3 mb-6">
-            <Settings className="h-6 w-6 text-slate-600" />
-            <h3 className="text-xl font-semibold text-slate-900">Test Configuration</h3>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {/* Number of Questions */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Number of Questions
-                </label>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="5"
-                    max="50"
-                    value={config.numberOfQuestions}
-                    onChange={(e) => setConfig(prev => ({ ...prev, numberOfQuestions: parseInt(e.target.value) }))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="flex justify-between text-sm text-slate-600">
-                    <span>5</span>
-                    <span className="font-medium text-slate-900">{config.numberOfQuestions} questions</span>
-                    <span>50</span>
+          {/* Compact Configuration Form */}
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex-1">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-slate-50 to-indigo-50 p-4 border-b border-slate-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <Settings className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Test Configuration</h3>
+                    <p className="text-slate-600 text-sm">Customize your AI-generated test</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-slate-600">{subject.name} ({subject.code})</span>
+                  <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
+                    {subject.level}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 flex-1 overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
+                {/* Left Column - Basic Settings */}
+                <div className="space-y-4">
+                  {/* Number of Questions */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="p-1.5 bg-blue-100 rounded-lg">
+                        <BarChart3 className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <h4 className="text-sm font-semibold text-slate-900">Questions</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="5"
+                          max="50"
+                          value={config.numberOfQuestions}
+                          onChange={(e) => setConfig(prev => ({ ...prev, numberOfQuestions: parseInt(e.target.value) }))}
+                          className="w-full h-2 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #3b82f6 0%, #6366f1 ${(config.numberOfQuestions - 5) / 45 * 100}%, #e2e8f0 ${(config.numberOfQuestions - 5) / 45 * 100}%, #e2e8f0 100%)`
+                          }}
+                        />
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-slate-900">{config.numberOfQuestions}</div>
+                        <div className="text-xs text-slate-600">questions</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Difficulty Level */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="p-1.5 bg-green-100 rounded-lg">
+                        <Target className="h-4 w-4 text-green-600" />
+                      </div>
+                      <h4 className="text-sm font-semibold text-slate-900">Difficulty</h4>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['easy', 'medium', 'hard'] as const).map((level) => (
+                        <button
+                          key={level}
+                          onClick={() => setConfig(prev => ({ ...prev, difficulty: level }))}
+                          className={`p-2 rounded-lg border-2 transition-all duration-200 text-xs ${
+                            config.difficulty === level
+                              ? 'border-green-500 bg-green-100 text-green-700 shadow-md'
+                              : 'border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="capitalize font-semibold text-center">{level}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Duration */}
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <div className="p-1.5 bg-purple-100 rounded-lg">
+                        <Timer className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <h4 className="text-sm font-semibold text-slate-900">Duration</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
+                        <input
+                          type="number"
+                          min="5"
+                          max="300"
+                          value={config.duration}
+                          onChange={(e) => setConfig(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                          className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div className="text-xs text-purple-600 text-center">
+                        Auto: {config.numberOfQuestions + 10} min
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Middle Column - Topics */}
+                <div className="space-y-4">
+                  {/* Topics Selection */}
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 h-full flex flex-col">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="p-1.5 bg-orange-100 rounded-lg">
+                          <BookOpen className="h-4 w-4 text-orange-600" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-slate-900">Topics</h4>
+                          <p className="text-xs text-slate-600">{config.topics.length} of {availableTopics.length} selected</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={handleSelectAllTopics}
+                          className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-xs font-medium transition-colors"
+                        >
+                          All
+                        </button>
+                        <button
+                          onClick={handleDeselectAllTopics}
+                          className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium transition-colors"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Search Topics */}
+                    <div className="relative mb-3">
+                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Search topics..."
+                        value={topicSearchQuery}
+                        onChange={(e) => setTopicSearchQuery(e.target.value)}
+                        className="w-full pl-7 pr-3 py-1.5 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Topics List */}
+                    <div className="flex-1 overflow-y-auto border border-slate-200 rounded bg-white">
+                      <div className="p-2 space-y-1">
+                        {filteredTopics.map((topic) => (
+                          <label key={topic} className="flex items-center space-x-2 p-2 hover:bg-slate-50 rounded cursor-pointer transition-colors group">
+                            <div className="relative">
+                              <input
+                                type="checkbox"
+                                checked={config.topics.includes(topic)}
+                                onChange={() => handleTopicToggle(topic)}
+                                className="sr-only"
+                              />
+                              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                                config.topics.includes(topic)
+                                  ? 'bg-orange-500 border-orange-500 text-white'
+                                  : 'border-slate-300 group-hover:border-orange-400'
+                              }`}>
+                                {config.topics.includes(topic) && <CheckSquare className="h-2.5 w-2.5" />}
+                              </div>
+                            </div>
+                            <span className="text-xs text-slate-700 group-hover:text-slate-900 font-medium">{topic}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {config.topics.length === 0 && (
+                      <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
+                        <div className="flex items-center space-x-1">
+                          <Lightbulb className="h-3 w-3 text-amber-600" />
+                          <span className="text-xs text-amber-700 font-medium">Select at least one topic</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Column - Question Types & Generate */}
+                <div className="space-y-4">
+                  {/* Question Types */}
+                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-4 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="p-1.5 bg-cyan-100 rounded-lg">
+                          <FileText className="h-4 w-4 text-cyan-600" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-slate-900">Question Types</h4>
+                          <p className="text-xs text-slate-600">{config.questionTypes.length} of {availableQuestionTypes.length} selected</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={handleSelectAllQuestionTypes}
+                          className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-xs font-medium transition-colors"
+                        >
+                          All
+                        </button>
+                        <button
+                          onClick={handleDeselectAllQuestionTypes}
+                          className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium transition-colors"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-1">
+                      {availableQuestionTypes.map((questionType) => (
+                        <label key={questionType} className="flex items-start space-x-2 p-2 hover:bg-white rounded cursor-pointer border border-slate-200 transition-all hover:shadow-sm">
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              checked={config.questionTypes.includes(questionType)}
+                              onChange={() => handleQuestionTypeToggle(questionType)}
+                              className="sr-only"
+                            />
+                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+                              config.questionTypes.includes(questionType)
+                                ? 'bg-cyan-500 border-cyan-500 text-white'
+                                : 'border-slate-300'
+                            }`}>
+                              {config.questionTypes.includes(questionType) && <CheckSquare className="h-2.5 w-2.5" />}
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-xs font-medium text-slate-900">{QUESTION_TYPES[questionType].label}</div>
+                            <div className="text-xs text-slate-600">{QUESTION_TYPES[questionType].description}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+
+                    {config.questionTypes.length === 0 && (
+                      <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
+                        <div className="flex items-center space-x-1">
+                          <Lightbulb className="h-3 w-3 text-amber-600" />
+                          <span className="text-xs text-amber-700 font-medium">Select at least one type</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Generate Button */}
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center space-x-2 mb-3">
+                        <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
+                          <Sparkles className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900">Ready to Generate?</h4>
+                          <p className="text-xs text-slate-600">Create your personalized AI test</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleGenerate}
+                        disabled={isGenerating || config.topics.length === 0 || config.questionTypes.length === 0}
+                        className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2 text-sm font-semibold"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            <span>Generating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="h-4 w-4" />
+                            <span>Generate AI Test</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Difficulty Level */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Difficulty Level
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {(['easy', 'medium', 'hard'] as const).map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setConfig(prev => ({ ...prev, difficulty: level }))}
-                      className={`p-3 rounded-lg border-2 transition-colors ${
-                        config.difficulty === level
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                          : 'border-slate-200 hover:border-slate-300 text-slate-700'
-                      }`}
-                    >
-                      <div className="capitalize font-medium">{level}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Question Types */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Question Types ({config.questionTypes.length} selected)
-                </label>
-                <div className="space-y-2">
-                  {availableQuestionTypes.map((questionType) => (
-                    <label key={questionType} className="flex items-start space-x-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer border border-slate-200">
-                      <input
-                        type="checkbox"
-                        checked={config.questionTypes.includes(questionType)}
-                        onChange={() => handleQuestionTypeToggle(questionType)}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded mt-0.5"
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-slate-900">{QUESTION_TYPES[questionType].label}</div>
-                        <div className="text-sm text-slate-600">{QUESTION_TYPES[questionType].description}</div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-                {config.questionTypes.length === 0 && (
-                  <p className="text-sm text-amber-600 mt-2">Please select at least one question type</p>
-                )}
-              </div>
-
-              {/* Duration */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Test Duration (minutes)
-                </label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <input
-                    type="number"
-                    min="5"
-                    max="300"
-                    value={config.duration}
-                    onChange={(e) => setConfig(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Auto-calculated: {config.numberOfQuestions + 10} minutes (1 minute per question + 10 minutes buffer)
-                </p>
-              </div>
-            </div>
-
-            {/* Right Column - Topics */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
-                Select Topics ({config.topics.length} selected)
-              </label>
-              <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-lg p-4">
-                <div className="grid grid-cols-1 gap-2">
-                  {availableTopics.map((topic) => (
-                    <label key={topic} className="flex items-center space-x-3 p-2 hover:bg-slate-50 rounded cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={config.topics.includes(topic)}
-                        onChange={() => handleTopicToggle(topic)}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
-                      />
-                      <span className="text-sm text-slate-700">{topic}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              {config.topics.length === 0 && (
-                <p className="text-sm text-amber-600 mt-2">Please select at least one topic to generate questions</p>
-              )}
             </div>
           </div>
 
           {/* Error Display */}
           {error && (
-            <div className="mt-6 p-6 bg-red-50 border-2 border-red-300 rounded-lg">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-red-800 mb-2">AI Test Generation Failed</h3>
-                  <div className="text-sm text-red-700 whitespace-pre-line">{error}</div>
-                </div>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex-shrink-0">
+              <div className="flex items-center space-x-2">
+                <svg className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-red-700 font-medium">AI Test Generation Failed</span>
               </div>
+              <div className="text-sm text-red-600 mt-1">{error}</div>
             </div>
           )}
-
-          {/* Generate Button */}
-          <div className="mt-8 flex justify-end">
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating || config.topics.length === 0 || config.questionTypes.length === 0}
-              className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-            >
-              {isGenerating ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  <span>Generating Test...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="h-4 w-4" />
-                  <span>Generate AI Test</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* AI Features Info */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-100">
-          <div className="flex items-center space-x-3 mb-3">
-            <Brain className="h-6 w-6 text-indigo-600" />
-            <h3 className="text-lg font-semibold text-slate-900">Powered by AI</h3>
-          </div>
-          <p className="text-slate-700 mb-4">
-            Our AI will generate high-quality, curriculum-aligned questions based on your selected topics and difficulty level. 
-            Each question includes detailed explanations to help you learn.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-              <span className="text-slate-600">Curriculum-aligned questions</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-              <span className="text-slate-600">Detailed explanations</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-              <span className="text-slate-600">Multiple difficulty levels</span>
-            </div>
-          </div>
         </div>
       </div>
     </DashboardLayout>
