@@ -152,7 +152,7 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
 
       <div className="space-y-3">
         {attempts.slice(0, 3).map((attempt, index) => {
-          const trend = getPerformanceTrend(attempt.score)
+          const trend = getPerformanceTrend(Math.round((attempt.score / attempt.test.totalMarks) * 100))
           const TrendIcon = trend.icon
           
           return (
@@ -186,8 +186,8 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
                 </div>
                 
                 <div className="text-right ml-2">
-                  <div className={`text-lg font-bold ${getScoreColor(attempt.score)}`}>
-                    {attempt.score}%
+                  <div className={`text-lg font-bold ${getScoreColor(Math.round((attempt.score / attempt.test.totalMarks) * 100))}`}>
+                    {Math.round((attempt.score / attempt.test.totalMarks) * 100)}%
                   </div>
                   <div className={`inline-flex items-center space-x-0.5 px-1.5 py-0.5 rounded-full text-xs font-medium ${getGradeColor(attempt.grade)}`}>
                     <Award className="h-2.5 w-2.5" />
@@ -208,11 +208,11 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
                 <div className="w-full bg-slate-200 rounded-full h-1.5">
                   <div 
                     className={`h-1.5 rounded-full transition-all duration-500 ${
-                      attempt.score >= 80 ? 'bg-gradient-to-r from-green-400 to-green-500' :
-                      attempt.score >= 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
+                      Math.round((attempt.score / attempt.test.totalMarks) * 100) >= 80 ? 'bg-gradient-to-r from-green-400 to-green-500' :
+                      Math.round((attempt.score / attempt.test.totalMarks) * 100) >= 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
                       'bg-gradient-to-r from-red-400 to-red-500'
                     }`}
-                    style={{ width: `${attempt.score}%` }}
+                    style={{ width: `${Math.round((attempt.score / attempt.test.totalMarks) * 100)}%` }}
                   />
                 </div>
               </div>
@@ -220,7 +220,7 @@ export default function RecentActivity({ attempts }: RecentActivityProps) {
               {/* Compact Stats */}
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div className="text-center p-1.5 bg-white rounded-md">
-                  <div className="text-sm font-semibold text-slate-900">{attempt.test.totalMarks}</div>
+                  <div className="text-sm font-semibold text-slate-900">{attempt.score}/{attempt.test.totalMarks}</div>
                   <div className="text-xs text-slate-600">Marks</div>
                 </div>
                 <div className="text-center p-1.5 bg-white rounded-md">

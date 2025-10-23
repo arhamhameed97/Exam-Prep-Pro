@@ -49,15 +49,22 @@ async function getTestStats(userId: string) {
       ? completedAttempts.reduce((sum, attempt) => sum + attempt.timeSpent, 0) / completedAttempts.length
       : 0
     
-    const bestScore = completedAttempts.length > 0
-      ? Math.max(...completedAttempts.map(attempt => attempt.score))
-      : 0
+    // Calculate average score across all tests as percentage
+    let averageScore = 0
+    
+    if (completedAttempts.length > 0) {
+      const scoresWithPercentages = completedAttempts.map(attempt => {
+        const totalMarks = attempt.test.totalMarks || 10
+        return (attempt.score / totalMarks) * 100
+      })
+      averageScore = scoresWithPercentages.reduce((sum, score) => sum + score, 0) / scoresWithPercentages.length
+    }
 
     return {
       totalTests,
       completedTests,
       averageTime: Math.round(averageTime),
-      bestScore: Math.round(bestScore)
+      averageScore: Math.round(averageScore)
     }
   } catch (error) {
     console.error('Error fetching test stats:', error)
@@ -65,7 +72,7 @@ async function getTestStats(userId: string) {
       totalTests: 0,
       completedTests: 0,
       averageTime: 0,
-      bestScore: 0
+      averageScore: 0
     }
   }
 }
@@ -147,9 +154,9 @@ export default async function TestsPage() {
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Best Score</p>
+                <p className="text-sm font-medium text-slate-600">Average Score</p>
                 <p className="text-2xl font-bold text-slate-900">
-                  {stats.bestScore > 0 ? `${stats.bestScore}%` : '-'}
+                  {stats.averageScore > 0 ? `${stats.averageScore}%` : '-'}
                 </p>
               </div>
             </div>
@@ -199,7 +206,7 @@ export default async function TestsPage() {
                           <div className="flex items-center gap-1">
                             <Award className="h-4 w-4 text-green-600" />
                             <span className="text-sm text-slate-600">
-                              Score: <span className="font-medium text-green-600">{latestAttempt.score}%</span>
+                              Score: <span className="font-medium text-green-600">{Math.round((latestAttempt.score / test.totalMarks) * 100)}%</span>
                             </span>
                           </div>
                           <div className="flex items-center gap-1">

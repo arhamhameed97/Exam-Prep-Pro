@@ -137,6 +137,7 @@ interface TestAttempt {
     id: string
     title: string
     duration: number
+    totalMarks: number
   }
 }
 
@@ -368,7 +369,7 @@ export default function SubjectPage() {
                             </div>
                             <div className="flex items-center space-x-1">
                               <Trophy className="h-4 w-4 text-yellow-500" />
-                              <span className="text-sm font-semibold text-slate-900">{attempt.score}%</span>
+                              <span className="text-sm font-semibold text-slate-900">{Math.round((attempt.score / attempt.test.totalMarks) * 100)}%</span>
                             </div>
                           </div>
                           

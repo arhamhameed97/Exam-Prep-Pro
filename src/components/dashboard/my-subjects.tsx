@@ -138,12 +138,22 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
           
           const totalTests = subject.tests?.length || 0
           const totalTimeSpent = completedAttempts.reduce((sum: number, attempt: any) => sum + (attempt.timeSpent || 0), 0)
-          const averageScore = completedAttempts.length > 0 
-            ? completedAttempts.reduce((sum: number, attempt: any) => sum + (attempt.score || 0), 0) / completedAttempts.length
-            : 0
-          const bestScore = completedAttempts.length > 0 
-            ? Math.max(...completedAttempts.map((attempt: any) => attempt.score || 0))
-            : 0
+          
+          // Calculate average and best scores as percentages
+          let averageScore = 0
+          let bestScore = 0
+          
+          if (completedAttempts.length > 0) {
+            // Get the total marks for each test to convert raw scores to percentages
+            const scoresWithPercentages = completedAttempts.map((attempt: any) => {
+              const test = subject.tests?.find((t: any) => t.id === attempt.testId)
+              const totalMarks = test?.totalMarks || 10 // Default to 10 if not found
+              return ((attempt.score || 0) / totalMarks) * 100
+            })
+            
+            averageScore = scoresWithPercentages.reduce((sum: number, score: number) => sum + score, 0) / scoresWithPercentages.length
+            bestScore = Math.max(...scoresWithPercentages)
+          }
 
           return {
             id: subject.id,

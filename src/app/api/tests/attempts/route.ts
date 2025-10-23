@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             title: true,
-            duration: true
+            duration: true,
+            totalMarks: true
           }
         }
       },
@@ -61,7 +62,8 @@ export async function GET(request: NextRequest) {
         test: {
           id: attempt.test.id,
           title: attempt.test.title,
-          duration: attempt.test.duration
+          duration: attempt.test.duration,
+          totalMarks: attempt.test.totalMarks
         }
       }))
     })

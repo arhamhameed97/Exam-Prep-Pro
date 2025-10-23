@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import {
   BookOpen,
@@ -9,7 +10,8 @@ import {
   Archive,
   Settings,
   User,
-  BarChart3
+  BarChart3,
+  LogOut
 } from "lucide-react"
 
 const navigation = [
@@ -25,6 +27,11 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
+  const { data: session } = useSession()
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/auth/signin' })
+  }
 
   return (
     <div className={cn("flex h-full w-72 flex-col bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700", className)}>
@@ -79,12 +86,25 @@ export function Sidebar({ className }: SidebarProps) {
             <User className="h-4 w-4 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">Student User</p>
-            <p className="text-xs text-slate-400 truncate">student@example.com</p>
+            <p className="text-sm font-medium text-white truncate">
+              {session?.user?.name || 'Student User'}
+            </p>
+            <p className="text-xs text-slate-400 truncate">
+              {session?.user?.email || 'student@example.com'}
+            </p>
           </div>
-          <button className="text-slate-400 hover:text-white transition-colors">
-            <Settings className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-x-2">
+            <button className="text-slate-400 hover:text-white transition-colors">
+              <Settings className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="text-slate-400 hover:text-red-400 transition-colors"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

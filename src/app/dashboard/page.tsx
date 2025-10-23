@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { BookOpen, Users, Clock, Trophy, TrendingUp, Brain } from "lucide-react"
+import { BookOpen, Users, Clock, Trophy, TrendingUp, Brain, Target, Zap, Award, Calendar, BarChart3, Star } from "lucide-react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -31,9 +31,33 @@ async function getDashboardStats(userId: string) {
       ? completedAttempts.reduce((sum, attempt) => sum + attempt.timeSpent, 0) / completedAttempts.length
       : 0
     
-    const bestScore = completedAttempts.length > 0
-      ? Math.max(...completedAttempts.map(attempt => attempt.score))
-      : 0
+    // Calculate average score across all subjects as percentage
+    let averageScore = 0
+    let averageGrade = 'N/A'
+    
+    if (completedAttempts.length > 0) {
+      // Calculate scores as percentages
+      const scoresWithPercentages = completedAttempts.map(attempt => {
+        const totalMarks = attempt.test.totalMarks || 10
+        return (attempt.score / totalMarks) * 100
+      })
+      
+      averageScore = scoresWithPercentages.reduce((sum, score) => sum + score, 0) / scoresWithPercentages.length
+      
+      // Calculate average grade based on average score
+      if (averageScore >= 90) averageGrade = 'A+'
+      else if (averageScore >= 85) averageGrade = 'A'
+      else if (averageScore >= 80) averageGrade = 'A-'
+      else if (averageScore >= 75) averageGrade = 'B+'
+      else if (averageScore >= 70) averageGrade = 'B'
+      else if (averageScore >= 65) averageGrade = 'B-'
+      else if (averageScore >= 60) averageGrade = 'C+'
+      else if (averageScore >= 55) averageGrade = 'C'
+      else if (averageScore >= 50) averageGrade = 'C-'
+      else if (averageScore >= 45) averageGrade = 'D+'
+      else if (averageScore >= 40) averageGrade = 'D'
+      else averageGrade = 'F'
+    }
 
     // Get recent test attempts
     const recentAttempts = await prisma.testAttempt.findMany({
@@ -70,12 +94,22 @@ async function getDashboardStats(userId: string) {
       
       const totalTests = subject.tests.length
       const totalTimeSpent = completedAttempts.reduce((sum, attempt) => sum + attempt.timeSpent, 0)
-      const averageScore = completedAttempts.length > 0 
-        ? completedAttempts.reduce((sum, attempt) => sum + attempt.score, 0) / completedAttempts.length
-        : 0
-      const bestScore = completedAttempts.length > 0 
-        ? Math.max(...completedAttempts.map(attempt => attempt.score))
-        : 0
+      
+      // Calculate average and best scores as percentages
+      let averageScore = 0
+      let bestScore = 0
+      
+      if (completedAttempts.length > 0) {
+        // Get the total marks for each test to convert raw scores to percentages
+        const scoresWithPercentages = completedAttempts.map(attempt => {
+          const test = subject.tests.find(t => t.id === attempt.testId)
+          const totalMarks = test?.totalMarks || 10 // Default to 10 if not found
+          return (attempt.score / totalMarks) * 100
+        })
+        
+        averageScore = scoresWithPercentages.reduce((sum, score) => sum + score, 0) / scoresWithPercentages.length
+        bestScore = Math.max(...scoresWithPercentages)
+      }
       
       // Calculate recent activity (last 7 days)
       const weekAgo = new Date()
@@ -119,7 +153,8 @@ async function getDashboardStats(userId: string) {
       totalTests,
       completedTests,
       averageTime: Math.round(averageTime),
-      bestScore: Math.round((bestScore / (totalTests * 10)) * 100), // Assuming 10 marks per test on average
+      averageScore: Math.round(averageScore),
+      averageGrade,
       recentAttempts,
       subjectStats
     }
@@ -129,7 +164,8 @@ async function getDashboardStats(userId: string) {
       totalTests: 0,
       completedTests: 0,
       averageTime: 0,
-      bestScore: 0,
+      averageScore: 0,
+      averageGrade: 'N/A',
       recentAttempts: [],
       subjectStats: []
     }
@@ -148,79 +184,175 @@ export default async function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Welcome Header */}
-        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">
-                Welcome back, {session.user.name || 'Student'}! 👋
-              </h1>
-              <p className="text-indigo-100 text-lg">
-                Ready to ace your O/A Level exams? Let's get started with your studies.
-              </p>
-            </div>
-            <div className="hidden md:block">
-              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center">
-                <Brain className="h-12 w-12 text-white" />
+        {/* Compact Hero Section */}
+        <div className="relative overflow-hidden">
+          {/* Background with animated gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent rounded-2xl"></div>
+          
+          {/* Floating elements */}
+          <div className="absolute top-2 right-2 w-12 h-12 bg-white/10 rounded-full blur-lg"></div>
+          <div className="absolute bottom-2 left-2 w-8 h-8 bg-white/5 rounded-full blur-md"></div>
+          
+          <div className="relative p-4 lg:p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* Welcome Content */}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                    <Brain className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1">
+                      Welcome back, {session.user.name || 'Student'}! 👋
+                    </h1>
+                    <p className="text-white/90 text-sm lg:text-base">
+                      Ready to ace your O/A Level exams? Let's track your progress and achieve excellence.
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Quick Stats Row */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+                    <Trophy className="h-4 w-4 text-yellow-300" />
+                    <span className="text-white text-sm font-semibold">Avg: {stats.averageScore}%</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+                    <Award className="h-4 w-4 text-purple-300" />
+                    <span className="text-white text-sm font-semibold">Grade: {stats.averageGrade}</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1">
+                    <Target className="h-3 w-3 text-green-300" />
+                    <span className="text-white text-sm font-medium">{stats.completedTests} Completed</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1">
+                    <Zap className="h-3 w-3 text-blue-300" />
+                    <span className="text-white text-sm font-medium">{stats.totalTests} Tests Available</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Visual Element */}
+              <div className="hidden lg:block">
+                <div className="relative">
+                  <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/30 shadow-lg">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white mb-1 drop-shadow-lg">{stats.averageScore}%</div>
+                      <div className="text-white/90 text-sm font-medium mb-1">Avg Score</div>
+                      <div className="text-white text-lg font-bold drop-shadow-md">{stats.averageGrade}</div>
+                    </div>
+                  </div>
+                  {/* Floating icons */}
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                    <Star className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-green-400 rounded-full flex items-center justify-center animate-pulse shadow-lg">
+                    <Award className="h-3 w-3 text-white" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <BookOpen className="h-6 w-6 text-blue-600" />
+        {/* Compact Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Total Tests Card */}
+          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-indigo-200 transition-all duration-300 hover:-translate-y-0.5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
+                <BookOpen className="h-5 w-5 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Total Tests</p>
-                <p className="text-2xl font-bold text-slate-900">{stats.totalTests}</p>
-                <p className="text-xs text-slate-500">Available tests</p>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  {stats.totalTests}
+                </div>
+                <div className="text-xs text-slate-500">Available</div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-600">Total Tests</span>
+                <TrendingUp className="h-3 w-3 text-green-500" />
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full transition-all duration-500" style={{ width: '100%' }}></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <Users className="h-6 w-6 text-green-600" />
+          {/* Completed Tests Card */}
+          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-green-200 transition-all duration-300 hover:-translate-y-0.5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
+                <Users className="h-5 w-5 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Completed</p>
-                <p className="text-2xl font-bold text-slate-900">{stats.completedTests}</p>
-                <p className="text-xs text-slate-500">Tests taken</p>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-slate-900 group-hover:text-green-600 transition-colors">
+                  {stats.completedTests}
+                </div>
+                <div className="text-xs text-slate-500">Completed</div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-600">Tests Taken</span>
+                <Target className="h-3 w-3 text-green-500" />
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5">
+                <div className="bg-gradient-to-r from-green-500 to-green-600 h-1.5 rounded-full transition-all duration-500" 
+                     style={{ width: `${stats.totalTests > 0 ? (stats.completedTests / stats.totalTests) * 100 : 0}%` }}></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <Clock className="h-6 w-6 text-yellow-600" />
+          {/* Average Time Card */}
+          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-yellow-200 transition-all duration-300 hover:-translate-y-0.5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
+                <Clock className="h-5 w-5 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Average Time</p>
-                <p className="text-2xl font-bold text-slate-900">
+              <div className="text-right">
+                <div className="text-2xl font-bold text-slate-900 group-hover:text-yellow-600 transition-colors">
                   {stats.averageTime > 0 ? `${stats.averageTime}m` : '-'}
-                </p>
-                <p className="text-xs text-slate-500">Per test</p>
+                </div>
+                <div className="text-xs text-slate-500">Average</div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-600">Time Per Test</span>
+                <BarChart3 className="h-3 w-3 text-yellow-500" />
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5">
+                <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-1.5 rounded-full transition-all duration-500" 
+                     style={{ width: `${Math.min((stats.averageTime / 30) * 100, 100)}%` }}></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <Trophy className="h-6 w-6 text-purple-600" />
+          {/* Average Score Card */}
+          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-purple-200 transition-all duration-300 hover:-translate-y-0.5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
+                <Trophy className="h-5 w-5 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Best Score</p>
-                <p className="text-2xl font-bold text-slate-900">
-                  {stats.bestScore > 0 ? `${stats.bestScore}%` : '-'}
-                </p>
-                <p className="text-xs text-slate-500">Highest achieved</p>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
+                  {stats.averageScore > 0 ? `${stats.averageScore}%` : '-'}
+                </div>
+                <div className="text-xs text-slate-500">Avg Score</div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-slate-600">Grade: {stats.averageGrade}</span>
+                <Star className="h-3 w-3 text-purple-500" />
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5">
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-1.5 rounded-full transition-all duration-500" 
+                     style={{ width: `${stats.averageScore}%` }}></div>
               </div>
             </div>
           </div>
