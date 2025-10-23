@@ -34,7 +34,8 @@ import {
   Laptop
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { Eye, Calendar, Trophy, CheckCircle } from "lucide-react"
 
 // Subject data mapping
 const subjectData: Record<string, { name: string; code: string; level: string; description: string; icon: any; color: string }> = {
@@ -126,12 +127,53 @@ const subjectData: Record<string, { name: string; code: string; level: string; d
   "9395": { name: "Travel and Tourism", code: "9395", level: "A-Level", description: "Tourism industry and travel management", icon: Plane, color: "bg-cyan-600" },
 }
 
+interface TestAttempt {
+  id: string
+  score: number
+  grade: string
+  timeSpent: number
+  completedAt: string
+  test: {
+    id: string
+    title: string
+    duration: number
+  }
+}
+
 export default function SubjectPage() {
   const params = useParams()
   const router = useRouter()
   const code = params.code as string
   const subject = subjectData[code]
   const [activeTab, setActiveTab] = useState('overview')
+  const [testAttempts, setTestAttempts] = useState<TestAttempt[]>([])
+  const [loading, setLoading] = useState(false)
+
+  // Fetch test attempts for this subject
+  useEffect(() => {
+    const fetchTestAttempts = async () => {
+      if (activeTab === 'tests' || activeTab === 'overview') {
+        setLoading(true)
+        try {
+          const response = await fetch(`/api/tests/attempts?subjectCode=${code}`)
+          if (response.ok) {
+            const data = await response.json()
+            setTestAttempts(data.attempts || [])
+          }
+        } catch (error) {
+          console.error('Error fetching test attempts:', error)
+        } finally {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchTestAttempts()
+  }, [activeTab, code])
+
+  const handleViewResults = (attempt: any) => {
+    router.push(`/tests/${attempt.test.id}?viewResults=${attempt.id}`)
+  }
 
   if (!subject) {
     return (
@@ -238,7 +280,7 @@ export default function SubjectPage() {
                       <h3 className="font-semibold text-slate-900">Your Progress</h3>
                       <TrendingUp className="h-5 w-5 text-slate-400" />
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">0%</p>
+                    <p className="text-3xl font-bold text-slate-900">{testAttempts.length}</p>
                     <p className="text-sm text-slate-600 mt-1">Tests completed</p>
                   </div>
                 </div>
@@ -260,41 +302,93 @@ export default function SubjectPage() {
 
             {activeTab === 'tests' && (
               <div className="space-y-6">
-                <div className="text-center py-8">
-                  <TestTube className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Generate Your First Test</h3>
-                  <p className="text-slate-600 mb-6">Create a custom practice test tailored to your needs using AI.</p>
-                  <button 
-                    onClick={() => router.push(`/subjects/${code}/generate-test`)}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2 mx-auto"
-                  >
-                    <Brain className="h-4 w-4" />
-                    <span>Generate AI Test</span>
-                  </button>
-                </div>
-                
+                {/* Generate New Test Section */}
                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <Brain className="h-6 w-6 text-indigo-600" />
-                    <h4 className="text-lg font-semibold text-slate-900">AI-Powered Test Generation</h4>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <Brain className="h-6 w-6 text-indigo-600" />
+                      <h3 className="text-lg font-semibold text-slate-900">Generate New Test</h3>
+                    </div>
+                    <button 
+                      onClick={() => router.push(`/subjects/${code}/generate-test`)}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+                    >
+                      <Brain className="h-4 w-4" />
+                      <span>Generate AI Test</span>
+                    </button>
                   </div>
                   <p className="text-slate-700 mb-4">
-                    Our AI will create high-quality questions based on your selected topics, difficulty level, and curriculum requirements.
+                    Create a custom practice test tailored to your needs using AI. Our AI will generate high-quality questions based on your selected topics, difficulty level, and curriculum requirements.
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                      <span className="text-slate-600">Customizable difficulty</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                      <span className="text-slate-600">Topic-specific questions</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                      <span className="text-slate-600">Detailed explanations</span>
-                    </div>
+                </div>
+
+                {/* Past Test Attempts */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">Your Test History</h3>
+                    <span className="text-sm text-slate-600">{testAttempts.length} tests completed</span>
                   </div>
+
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent mx-auto mb-4"></div>
+                      <p className="text-slate-600">Loading your test history...</p>
+                    </div>
+                  ) : testAttempts.length === 0 ? (
+                    <div className="text-center py-8 bg-slate-50 rounded-lg">
+                      <TestTube className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                      <h4 className="text-lg font-semibold text-slate-900 mb-2">No Tests Yet</h4>
+                      <p className="text-slate-600 mb-4">You haven't taken any tests for this subject yet.</p>
+                      <button 
+                        onClick={() => router.push(`/subjects/${code}/generate-test`)}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                      >
+                        Generate Your First Test
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {testAttempts.map((attempt) => (
+                        <div key={attempt.id} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-slate-900 text-sm mb-1">
+                                {attempt.test.title.length > 30 ? `${attempt.test.title.substring(0, 30)}...` : attempt.test.title}
+                              </h4>
+                              <div className="flex items-center space-x-4 text-xs text-slate-600">
+                                <div className="flex items-center space-x-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{new Date(attempt.completedAt).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{attempt.timeSpent} min</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Trophy className="h-4 w-4 text-yellow-500" />
+                              <span className="text-sm font-semibold text-slate-900">{attempt.score}%</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              <span className="text-sm font-medium text-slate-700">{attempt.grade}</span>
+                            </div>
+                            <button
+                              onClick={() => handleViewResults(attempt)}
+                              className="px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded text-xs font-medium transition-colors flex items-center space-x-1"
+                            >
+                              <Eye className="h-3 w-3" />
+                              <span>View Results</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

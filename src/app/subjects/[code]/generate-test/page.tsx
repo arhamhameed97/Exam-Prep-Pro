@@ -313,26 +313,26 @@ export default function GenerateTestPage() {
           <div className="relative overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 opacity-10 rounded-2xl"></div>
             <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => router.back()}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => router.back()}
                     className="p-2 hover:bg-slate-100 rounded-lg transition-all duration-200"
-                  >
-                    <ArrowLeft className="h-5 w-5 text-slate-600" />
-                  </button>
+            >
+              <ArrowLeft className="h-5 w-5 text-slate-600" />
+            </button>
                   <div className="flex items-center space-x-3">
                     <div className={`p-3 rounded-xl ${subject.color} shadow-md`}>
                       <IconComponent className="h-6 w-6 text-white" />
                     </div>
-                    <div>
+            <div>
                       <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                         Generate AI Test
                       </h1>
                       <p className="text-slate-600 text-sm">Create a custom practice test using AI</p>
-                    </div>
-                  </div>
-                </div>
+            </div>
+          </div>
+        </div>
                 <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full">
                   <Sparkles className="h-4 w-4 text-indigo-600" />
                   <span className="text-xs font-medium text-indigo-700">AI Powered</span>
@@ -350,8 +350,8 @@ export default function GenerateTestPage() {
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-indigo-100 rounded-lg">
                     <Settings className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <div>
+            </div>
+            <div>
                     <h3 className="text-lg font-bold text-slate-900">Test Configuration</h3>
                     <p className="text-slate-600 text-sm">Customize your AI-generated test</p>
                   </div>
@@ -359,8 +359,8 @@ export default function GenerateTestPage() {
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-slate-600">{subject.name} ({subject.code})</span>
                   <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
-                    {subject.level}
-                  </span>
+                  {subject.level}
+                </span>
                 </div>
               </div>
             </div>
@@ -374,17 +374,17 @@ export default function GenerateTestPage() {
                     <div className="flex items-center space-x-2 mb-3">
                       <div className="p-1.5 bg-blue-100 rounded-lg">
                         <BarChart3 className="h-4 w-4 text-blue-600" />
-                      </div>
+          </div>
                       <h4 className="text-sm font-semibold text-slate-900">Questions</h4>
-                    </div>
-                    <div className="space-y-2">
+          </div>
+                <div className="space-y-2">
                       <div className="relative">
-                        <input
-                          type="range"
-                          min="5"
-                          max="50"
-                          value={config.numberOfQuestions}
-                          onChange={(e) => setConfig(prev => ({ ...prev, numberOfQuestions: parseInt(e.target.value) }))}
+                  <input
+                    type="range"
+                    min="5"
+                    max="50"
+                    value={config.numberOfQuestions}
+                    onChange={(e) => setConfig(prev => ({ ...prev, numberOfQuestions: parseInt(e.target.value) }))}
                           className="w-full h-2 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg appearance-none cursor-pointer slider"
                           style={{
                             background: `linear-gradient(to right, #3b82f6 0%, #6366f1 ${(config.numberOfQuestions - 5) / 45 * 100}%, #e2e8f0 ${(config.numberOfQuestions - 5) / 45 * 100}%, #e2e8f0 100%)`
@@ -394,11 +394,11 @@ export default function GenerateTestPage() {
                       <div className="text-center">
                         <div className="text-lg font-bold text-slate-900">{config.numberOfQuestions}</div>
                         <div className="text-xs text-slate-600">questions</div>
-                      </div>
-                    </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Difficulty Level */}
+              {/* Difficulty Level */}
                   <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
                     <div className="flex items-center space-x-2 mb-3">
                       <div className="p-1.5 bg-green-100 rounded-lg">
@@ -407,21 +407,21 @@ export default function GenerateTestPage() {
                       <h4 className="text-sm font-semibold text-slate-900">Difficulty</h4>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      {(['easy', 'medium', 'hard'] as const).map((level) => (
-                        <button
-                          key={level}
-                          onClick={() => setConfig(prev => ({ ...prev, difficulty: level }))}
+                  {(['easy', 'medium', 'hard'] as const).map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => setConfig(prev => ({ ...prev, difficulty: level }))}
                           className={`p-2 rounded-lg border-2 transition-all duration-200 text-xs ${
-                            config.difficulty === level
+                        config.difficulty === level
                               ? 'border-green-500 bg-green-100 text-green-700 shadow-md'
                               : 'border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
+                      }`}
+                    >
                           <div className="capitalize font-semibold text-center">{level}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
                   {/* Duration */}
                   <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
@@ -430,16 +430,16 @@ export default function GenerateTestPage() {
                         <Timer className="h-4 w-4 text-purple-600" />
                       </div>
                       <h4 className="text-sm font-semibold text-slate-900">Duration</h4>
-                    </div>
+                </div>
                     <div className="space-y-2">
-                      <div className="relative">
+                <div className="relative">
                         <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
-                        <input
-                          type="number"
-                          min="5"
-                          max="300"
-                          value={config.duration}
-                          onChange={(e) => setConfig(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                  <input
+                    type="number"
+                    min="5"
+                    max="300"
+                    value={config.duration}
+                    onChange={(e) => setConfig(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
                           className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                         />
                       </div>
@@ -477,8 +477,8 @@ export default function GenerateTestPage() {
                         >
                           Clear
                         </button>
-                      </div>
-                    </div>
+              </div>
+            </div>
 
                     {/* Search Topics */}
                     <div className="relative mb-3">
@@ -498,10 +498,10 @@ export default function GenerateTestPage() {
                         {filteredTopics.map((topic) => (
                           <label key={topic} className="flex items-center space-x-2 p-2 hover:bg-slate-50 rounded cursor-pointer transition-colors group">
                             <div className="relative">
-                              <input
-                                type="checkbox"
-                                checked={config.topics.includes(topic)}
-                                onChange={() => handleTopicToggle(topic)}
+                      <input
+                        type="checkbox"
+                        checked={config.topics.includes(topic)}
+                        onChange={() => handleTopicToggle(topic)}
                                 className="sr-only"
                               />
                               <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
@@ -513,21 +513,21 @@ export default function GenerateTestPage() {
                               </div>
                             </div>
                             <span className="text-xs text-slate-700 group-hover:text-slate-900 font-medium">{topic}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
 
-                    {config.topics.length === 0 && (
+              {config.topics.length === 0 && (
                       <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
                         <div className="flex items-center space-x-1">
                           <Lightbulb className="h-3 w-3 text-amber-600" />
                           <span className="text-xs text-amber-700 font-medium">Select at least one topic</span>
                         </div>
                       </div>
-                    )}
-                  </div>
-                </div>
+              )}
+            </div>
+          </div>
 
                 {/* Right Column - Question Types & Generate */}
                 <div className="space-y-4">
@@ -576,26 +576,26 @@ export default function GenerateTestPage() {
                             }`}>
                               {config.questionTypes.includes(questionType) && <CheckSquare className="h-2.5 w-2.5" />}
                             </div>
-                          </div>
-                          <div className="flex-1">
+                </div>
+                <div className="flex-1">
                             <div className="text-xs font-medium text-slate-900">{QUESTION_TYPES[questionType].label}</div>
                             <div className="text-xs text-slate-600">{QUESTION_TYPES[questionType].description}</div>
                           </div>
                         </label>
                       ))}
-                    </div>
+                </div>
 
                     {config.questionTypes.length === 0 && (
                       <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
                         <div className="flex items-center space-x-1">
                           <Lightbulb className="h-3 w-3 text-amber-600" />
                           <span className="text-xs text-amber-700 font-medium">Select at least one type</span>
-                        </div>
-                      </div>
-                    )}
+              </div>
+            </div>
+          )}
                   </div>
 
-                  {/* Generate Button */}
+          {/* Generate Button */}
                   <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4">
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-2 mb-3">
@@ -607,39 +607,39 @@ export default function GenerateTestPage() {
                           <p className="text-xs text-slate-600">Create your personalized AI test</p>
                         </div>
                       </div>
-                      <button
-                        onClick={handleGenerate}
-                        disabled={isGenerating || config.topics.length === 0 || config.questionTypes.length === 0}
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating || config.topics.length === 0 || config.questionTypes.length === 0}
                         className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2 text-sm font-semibold"
-                      >
-                        {isGenerating ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                             <span>Generating...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="h-4 w-4" />
-                            <span>Generate AI Test</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4" />
+                  <span>Generate AI Test</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
                 </div>
-              </div>
+          </div>
             </div>
           </div>
 
           {/* Error Display */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex-shrink-0">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
                 <svg className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
                 <span className="text-sm text-red-700 font-medium">AI Test Generation Failed</span>
-              </div>
+            </div>
               <div className="text-sm text-red-600 mt-1">{error}</div>
             </div>
           )}
