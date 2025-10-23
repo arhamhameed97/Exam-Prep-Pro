@@ -8,6 +8,8 @@ import { trackApiUsage } from './token-tracker'
 const geminiApiKey = process.env.GEMINI_API_KEY
 if (!geminiApiKey) {
   console.warn('GEMINI_API_KEY not found in environment variables. AI generation will fail.')
+} else {
+  console.log('GEMINI_API_KEY found, initializing Gemini API...')
 }
 
 const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null
@@ -40,6 +42,8 @@ export async function generateTestQuestions(request: TestGenerationRequest): Pro
     console.log('Gemini API not available, throwing error')
     throw new Error('AI service is not configured. Please contact support.')
   }
+
+  console.log(`[AI] Using model: ${AI_CONFIG.model}`)
 
   const maxAttempts = AI_CONFIG.retry.maxAttempts
   let lastError: Error | null = null

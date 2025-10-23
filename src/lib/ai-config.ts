@@ -4,7 +4,7 @@
 
 export const AI_CONFIG = {
   // Model configuration - using most cost-effective model
-  model: process.env.AI_MODEL || "gemini-pro", // Using stable gemini-pro model
+  model: process.env.AI_MODEL || "gemini-1.5-pro", // Using gemini-1.5-pro model
   
   // Generation configuration optimized for minimal token usage
   generationConfig: {

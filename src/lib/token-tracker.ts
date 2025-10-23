@@ -19,6 +19,10 @@ class TokenTracker {
       input: 0.0005, // $0.50 per 1M tokens
       output: 0.0015   // $1.50 per 1M tokens
     },
+    'gemini-1.5-pro': {
+      input: 0.00125, // $1.25 per 1M tokens
+      output: 0.005   // $5.00 per 1M tokens
+    },
     'gemini-1.5-flash': {
       input: 0.000075, // $0.075 per 1M tokens
       output: 0.0003   // $0.30 per 1M tokens
