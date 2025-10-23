@@ -15,6 +15,10 @@ class TokenTracker {
 
   // Token pricing (approximate rates for Gemini models)
   private readonly PRICING = {
+    'gemini-pro': {
+      input: 0.0005, // $0.50 per 1M tokens
+      output: 0.0015   // $1.50 per 1M tokens
+    },
     'gemini-1.5-flash': {
       input: 0.000075, // $0.075 per 1M tokens
       output: 0.0003   // $0.30 per 1M tokens
@@ -30,7 +34,7 @@ class TokenTracker {
   }
 
   trackUsage(inputTokens: number, outputTokens: number, model: string): TokenUsage {
-    const pricing = this.PRICING[model as keyof typeof this.PRICING] || this.PRICING['gemini-1.5-flash']
+    const pricing = this.PRICING[model as keyof typeof this.PRICING] || this.PRICING['gemini-pro']
     const cost = (inputTokens * pricing.input + outputTokens * pricing.output) / 1000000
 
     const usage: TokenUsage = {
