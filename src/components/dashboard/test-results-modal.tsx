@@ -57,12 +57,6 @@ export default function TestResultsModal({ isOpen, onClose, attemptId }: TestRes
   const [error, setError] = useState('')
   const router = useRouter()
 
-  useEffect(() => {
-    if (isOpen && attemptId) {
-      fetchAttemptData()
-    }
-  }, [isOpen, attemptId, fetchAttemptData])
-
   const fetchAttemptData = useCallback(async () => {
     try {
       setLoading(true)
@@ -88,6 +82,12 @@ export default function TestResultsModal({ isOpen, onClose, attemptId }: TestRes
       setLoading(false)
     }
   }, [attemptId])
+
+  useEffect(() => {
+    if (isOpen && attemptId) {
+      fetchAttemptData()
+    }
+  }, [isOpen, attemptId, fetchAttemptData])
 
   const formatTime = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`
