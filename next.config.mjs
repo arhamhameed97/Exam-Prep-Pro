@@ -51,6 +51,14 @@ const nextConfig = {
       }
     }
 
+    // Prisma fix for Vercel serverless
+    if (isServer) {
+      config.externals = config.externals || []
+      config.externals.push({
+        '.prisma/client/index-browser': '@prisma/client/index-browser',
+      })
+    }
+
     return config
   },
 
