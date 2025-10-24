@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react'
 import { 
   DollarSign, 
   TrendingUp, 
-  TrendingDown, 
   Zap, 
   Database,
-  AlertTriangle,
   CheckCircle
 } from 'lucide-react'
 

@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Get all tests for this user
     const tests = await prisma.test.findMany({
       where: {
-        userId: session.user.id
+        userId: (session as { user: { id: string } }).user.id
       },
       include: {
         subject: true,

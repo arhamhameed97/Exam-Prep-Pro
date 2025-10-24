@@ -6,7 +6,6 @@ import {
   Search, 
   Plus, 
   BookOpen, 
-  Check, 
   Loader2,
   AlertCircle,
   GraduationCap

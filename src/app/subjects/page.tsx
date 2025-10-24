@@ -145,7 +145,7 @@ export default function SubjectsPage() {
     }
     
     return acc
-  }, {} as typeof subjects)
+  }, {} as Record<string, typeof subjects['O-Level']>)
 
   const totalSubjects = Object.values(filteredSubjects).reduce((total, subjects) => total + subjects.length, 0)
 

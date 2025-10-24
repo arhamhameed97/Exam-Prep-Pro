@@ -52,7 +52,7 @@ const AVAILABLE_SUBJECTS = {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     // Get user's current subjects
     const userSubjects = await prisma.subject.findMany({
-      where: { userId: session.user.id },
+      where: { userId: (session as { user: { id: string } }).user.id },
       select: { code: true }
     })
 

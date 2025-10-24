@@ -1,10 +1,11 @@
-import { TestGenerationRequest, Question } from '@/types/test'
+import { TestGenerationRequest } from '@/types/test'
+import { GeneratedQuestion } from './gemini'
 
 // Request batching to reduce API calls
 interface BatchedRequest {
   id: string
   request: TestGenerationRequest
-  resolve: (questions: Question[]) => void
+  resolve: (questions: GeneratedQuestion[]) => void
   reject: (error: Error) => void
   timestamp: number
 }
@@ -15,7 +16,7 @@ class RequestBatcher {
   private readonly BATCH_SIZE = 3 // Batch up to 3 requests
   private readonly BATCH_TIMEOUT = 2000 // 2 seconds max wait
 
-  async addRequest(request: TestGenerationRequest): Promise<Question[]> {
+  async addRequest(request: TestGenerationRequest): Promise<GeneratedQuestion[]> {
     return new Promise((resolve, reject) => {
       const batchedRequest: BatchedRequest = {
         id: Math.random().toString(36).substr(2, 9),
@@ -86,7 +87,7 @@ class RequestBatcher {
 export const requestBatcher = new RequestBatcher()
 
 // Function to add request to batch
-export async function generateTestQuestionsBatched(request: TestGenerationRequest): Promise<Question[]> {
+export async function generateTestQuestionsBatched(request: TestGenerationRequest): Promise<GeneratedQuestion[]> {
   return requestBatcher.addRequest(request)
 }
 

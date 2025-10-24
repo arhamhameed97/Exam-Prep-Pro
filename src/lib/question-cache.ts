@@ -1,7 +1,8 @@
-import { TestGenerationRequest, GeneratedQuestion } from './gemini'
+import { TestGenerationRequest } from '@/types/test'
+import { GeneratedQuestion } from './gemini'
 
 // Simple in-memory cache for question generation
-const questionCache = new Map<string, GeneratedQuestion[]>()
+const questionCache = new Map<string, CacheEntry>()
 
 // Cache TTL in milliseconds (1 hour)
 const CACHE_TTL = 60 * 60 * 1000
@@ -27,7 +28,7 @@ export function generateCacheKey(request: TestGenerationRequest): string {
 
 export function getCachedQuestions(request: TestGenerationRequest): GeneratedQuestion[] | null {
   const cacheKey = generateCacheKey(request)
-  const cached = questionCache.get(cacheKey) as CacheEntry | undefined
+  const cached = questionCache.get(cacheKey)
   
   if (!cached) {
     return null

@@ -49,20 +49,20 @@ const AVAILABLE_SUBJECTS = {
 }
 
 // GET - Fetch user's subjects
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
     const subjects = await prisma.subject.findMany({
-      where: { userId: session.user.id },
+      where: { userId: (session as { user: { id: string } }).user.id },
       include: {
         tests: {
           include: {
             attempts: {
-              where: { userId: session.user.id }
+              where: { userId: (session as { user: { id: string } }).user.id }
             }
           }
         }
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     // Check if user already has this subject
     const existingSubject = await prisma.subject.findFirst({
       where: {
-        userId: session.user.id,
+        userId: (session as { user: { id: string } }).user.id,
         code: subjectCode
       }
     })
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         code: subjectData.code,
         description: subjectData.description,
         level,
-        userId: session.user.id
+        userId: (session as { user: { id: string } }).user.id
       }
     })
 
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
@@ -157,7 +157,7 @@ export async function DELETE(request: NextRequest) {
     const subject = await prisma.subject.findFirst({
       where: {
         id: subjectId,
-        userId: session.user.id
+        userId: (session as { user: { id: string } }).user.id
       }
     })
 

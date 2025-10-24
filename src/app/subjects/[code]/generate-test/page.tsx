@@ -18,12 +18,7 @@ import {
   Building,
   TrendingUp,
   Brain,
-  TestTube, 
-  Archive, 
   Clock, 
-  Award,
-  Play,
-  Download,
   Utensils,
   Wrench,
   Plane,
@@ -36,17 +31,11 @@ import {
   Settings,
   Zap,
   CheckSquare,
-  Square,
   Sparkles,
   Target,
   Timer,
   BarChart3,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
   Search,
-  Filter,
-  Star,
   Lightbulb
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
@@ -54,7 +43,7 @@ import { useState, useEffect } from "react"
 import { TestConfig, SUBJECT_TOPICS, DEFAULT_TOPICS, QuestionType, QUESTION_TYPES, getQuestionTypesForSubject } from "@/types/test"
 
 // Subject data mapping (same as in the main subject page)
-const subjectData: Record<string, { name: string; code: string; level: string; description: string; icon: any; color: string }> = {
+const subjectData: Record<string, { name: string; code: string; level: string; description: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
   // O-Level subjects - Core Subjects
   "4024": { name: "Mathematics", code: "4024", level: "O-Level", description: "Core Mathematics covering algebra, geometry, and statistics", icon: Calculator, color: "bg-blue-500" },
   "4037": { name: "Additional Mathematics", code: "4037", level: "O-Level", description: "Advanced mathematical concepts and problem-solving", icon: Calculator, color: "bg-blue-600" },
@@ -165,9 +154,6 @@ export default function GenerateTestPage() {
   const [availableQuestionTypes, setAvailableQuestionTypes] = useState<QuestionType[]>([])
   const [error, setError] = useState('')
   const [topicSearchQuery, setTopicSearchQuery] = useState('')
-  const [isTopicsExpanded, setIsTopicsExpanded] = useState(true)
-  const [isQuestionTypesExpanded, setIsQuestionTypesExpanded] = useState(true)
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
 
   useEffect(() => {
     if (subject) {

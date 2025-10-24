@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json(
         { message: "Unauthorized" },
         { status: 401 }
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     // For JWT strategy, user info is in the session token
     // We can optionally verify the user exists in the database, but it's not required for JWT
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: (session as { user: { id: string } }).user.id }
     })
 
     // If user doesn't exist in database, create them (for first-time users)
@@ -64,9 +64,9 @@ export async function POST(request: NextRequest) {
       try {
         await prisma.user.create({
           data: {
-            id: session.user.id,
-            email: session.user.email || '',
-            name: session.user.name || '',
+            id: (session as { user: { id: string; email?: string; name?: string } }).user.id,
+            email: (session as { user: { id: string; email?: string; name?: string } }).user.email || '',
+            name: (session as { user: { id: string; email?: string; name?: string } }).user.name || '',
             level: 'student'
           }
         })
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     let subject = await prisma.subject.findFirst({
       where: { 
         code: subjectCode,
-        userId: session.user.id
+        userId: (session as { user: { id: string } }).user.id
       }
     })
 
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
           code: subjectCode,
           level: subjectLevel,
           description: `AI-generated tests for ${subjectName}`,
-          userId: session.user.id
+          userId: (session as { user: { id: string } }).user.id
         }
       })
     }
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         topics: JSON.stringify(topics),
         questionTypes: JSON.stringify(questionTypes),
         subjectId: subject.id,
-        userId: session.user.id
+        userId: (session as { user: { id: string } }).user.id
       }
     })
 

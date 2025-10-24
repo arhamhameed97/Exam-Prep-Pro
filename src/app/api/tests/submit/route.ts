@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json(
         { message: "Unauthorized" },
         { status: 401 }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const test = await prisma.test.findFirst({
       where: {
         id: testId,
-        userId: session.user.id
+        userId: (session as { user: { id: string } }).user.id
       }
     })
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         answers: JSON.stringify(answers), // Store user's answers as JSON
         status: 'completed',
         testId,
-        userId: session.user.id
+        userId: (session as { user: { id: string } }).user.id
       }
     })
 

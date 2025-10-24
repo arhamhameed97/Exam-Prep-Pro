@@ -4,7 +4,6 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { 
   Clock, 
   CheckCircle, 
-  XCircle, 
   ArrowLeft, 
   ArrowRight,
   Play,
@@ -18,8 +17,6 @@ import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect, useCallback } from "react"
 import { 
   prepareSecureQuestionData, 
-  validateAnswer, 
-  getInstantFeedback,
   calculateTestScore,
   SecureQuestionData 
 } from "@/lib/mcq-validator"
@@ -69,7 +66,6 @@ export default function TestPage() {
   const [testResult, setTestResult] = useState<TestResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [viewResultsAttemptId, setViewResultsAttemptId] = useState<string | null>(null)
 
   // Load test data
   useEffect(() => {
@@ -81,7 +77,6 @@ export default function TestPage() {
     const urlParams = new URLSearchParams(window.location.search)
     const attemptId = urlParams.get('viewResults')
     if (attemptId) {
-      setViewResultsAttemptId(attemptId)
       loadAttemptResults(attemptId)
     }
   }, [])
@@ -132,16 +127,16 @@ export default function TestPage() {
         duration: testData.test.duration,
         totalMarks: testData.test.totalMarks,
         difficulty: testData.test.difficulty,
-        questions: testData.test.questions.map((q: any) => ({
+        questions: testData.test.questions.map((q: { id: string; questionText: string; options: string[]; correctAnswer: string; explanation: string; marks?: number; difficulty?: string; topic?: string; questionType?: string }) => ({
           id: q.id,
           questionText: q.questionText,
           options: q.options,
           correctAnswer: q.correctAnswer,
           explanation: q.explanation,
-          marks: q.marks,
-          difficulty: q.difficulty,
-          topic: q.topic,
-          questionType: q.questionType
+          marks: q.marks || 1,
+          difficulty: q.difficulty || 'medium',
+          topic: q.topic || 'general',
+          questionType: q.questionType || 'multiple-choice'
         }))
       }
 
@@ -150,7 +145,15 @@ export default function TestPage() {
       setIsTimerRunning(true) // Start timer automatically
       
       // Prepare secure questions with encrypted answers
-      const secure = fetchedTest.questions.map(prepareSecureQuestionData)
+      const secure = fetchedTest.questions.map(q => prepareSecureQuestionData({
+        ...q,
+        timesReused: 0,
+        testId: testData.test.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        difficulty: (q.difficulty as 'easy' | 'medium' | 'hard') || 'medium',
+        questionType: (q.questionType as 'mcq' | 'short-answer' | 'long-answer' | 'essay' | 'true-false' | 'fill-blanks') || 'mcq'
+      }))
       setSecureQuestions(secure)
       
     } catch (error) {
@@ -191,7 +194,15 @@ export default function TestPage() {
         }
         
         // Prepare secure questions
-        const secure = attemptTest.questions.map(prepareSecureQuestionData)
+        const secure = attemptTest.questions.map(q => prepareSecureQuestionData({
+          ...q,
+          timesReused: 0,
+          testId: attemptTest.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          difficulty: (q.difficulty as 'easy' | 'medium' | 'hard') || 'medium',
+          questionType: (q.questionType as 'mcq' | 'short-answer' | 'long-answer' | 'essay' | 'true-false' | 'fill-blanks') || 'mcq'
+        }))
         setSecureQuestions(secure)
         
         // Set the test result from the attempt
@@ -300,7 +311,6 @@ export default function TestPage() {
     setIsTimerRunning(false)
     setIsTestCompleted(false)
     setTestResult(null)
-    setViewResultsAttemptId(null)
     // Clear the viewResults query parameter
     const url = new URL(window.location.href)
     url.searchParams.delete('viewResults')

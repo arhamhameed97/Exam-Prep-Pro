@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { tokenTracker } from "@/lib/token-tracker"
@@ -8,7 +8,7 @@ export async function GET() {
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json(
         { message: "Unauthorized" },
         { status: 401 }
@@ -44,7 +44,11 @@ export async function GET() {
             percentage: (usageStats.monthly.tokens / 2000000) * 100
           }
         },
-        recommendations: generateRecommendations(usageStats, cacheStats)
+        recommendations: generateRecommendations({
+          daily: { tokens: usageStats.daily.tokens },
+          weekly: { tokens: usageStats.monthly.tokens / 4 }, // Approximate weekly from monthly
+          monthly: { tokens: usageStats.monthly.tokens }
+        }, { hitRate: 0.8, totalRequests: usageStats.total.requests })
       }
     })
 
@@ -64,15 +68,15 @@ function generateRecommendations(usageStats: { daily: { tokens: number }, weekly
     recommendations.push("High daily usage detected. Consider implementing more aggressive caching.")
   }
 
-  if (usageStats.averagePerRequest.tokens > 2000) {
+  if (usageStats.daily.tokens / Math.max(cacheStats.totalRequests, 1) > 2000) {
     recommendations.push("High token usage per request. Consider optimizing prompts further.")
   }
 
-  if (cacheStats.size < 10) {
-    recommendations.push("Low cache utilization. Consider extending cache duration.")
+  if (cacheStats.hitRate < 0.5) {
+    recommendations.push("Low cache hit rate. Consider extending cache duration.")
   }
 
-  if (usageStats.daily.requests > 100) {
+  if (cacheStats.totalRequests > 100) {
     recommendations.push("High request volume. Consider implementing request batching.")
   }
 

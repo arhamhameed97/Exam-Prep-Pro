@@ -10,7 +10,7 @@ export async function GET(
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json(
         { message: "Unauthorized" },
         { status: 401 }
@@ -23,7 +23,7 @@ export async function GET(
     const test = await prisma.test.findFirst({
       where: {
         id: testId,
-        userId: session.user.id // Ensure user can only access their own tests
+        userId: (session as { user: { id: string } }).user.id // Ensure user can only access their own tests
       },
       include: {
         questions: {

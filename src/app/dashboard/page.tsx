@@ -73,6 +73,28 @@ async function getDashboardStats(userId: string) {
       }
     })
 
+    // Transform recent attempts to match the expected interface
+    const transformedRecentAttempts = recentAttempts.map(attempt => ({
+      id: attempt.id,
+      score: attempt.score,
+      grade: attempt.grade || 'N/A',
+      timeSpent: attempt.timeSpent,
+      status: attempt.status,
+      completedAt: attempt.completedAt?.toISOString() || new Date().toISOString(),
+      test: {
+        id: attempt.test.id,
+        title: attempt.test.title,
+        difficulty: attempt.test.difficulty,
+        totalMarks: attempt.test.totalMarks,
+        duration: attempt.test.duration,
+        isAIGenerated: attempt.test.isAIGenerated,
+        subject: {
+          name: attempt.test.subject.name,
+          code: attempt.test.subject.code
+        }
+      }
+    }))
+
     // Get subject analytics
     const subjects = await prisma.subject.findMany({
       where: { userId },
@@ -135,7 +157,7 @@ async function getDashboardStats(userId: string) {
         name: subject.name,
         code: subject.code,
         level: subject.level,
-        description: subject.description,
+        description: subject.description || undefined,
         totalTests,
         totalTimeSpent,
         averageScore,
@@ -155,7 +177,7 @@ async function getDashboardStats(userId: string) {
       averageTime: Math.round(averageTime),
       averageScore: Math.round(averageScore),
       averageGrade,
-      recentAttempts,
+      recentAttempts: transformedRecentAttempts,
       subjectStats
     }
   } catch (error) {
@@ -175,11 +197,11 @@ async function getDashboardStats(userId: string) {
 export default async function Dashboard() {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user?.id) {
+  if (!(session as { user?: { id: string } })?.user?.id) {
     redirect('/auth/signin')
   }
 
-  const stats = await getDashboardStats(session.user.id)
+  const stats = await getDashboardStats((session as { user: { id: string } }).user.id)
 
   return (
     <DashboardLayout>
@@ -204,7 +226,7 @@ export default async function Dashboard() {
                   </div>
                   <div>
                     <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1">
-                      Welcome back, {session.user.name || 'Student'}! 👋
+                      Welcome back, {(session as { user: { name?: string } }).user.name || 'Student'}! 👋
                     </h1>
                     <p className="text-white/90 text-sm lg:text-base">
                       Ready to ace your O/A Level exams? Let&apos;s track your progress and achieve excellence.

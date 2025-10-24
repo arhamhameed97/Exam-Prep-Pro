@@ -21,7 +21,6 @@ import {
   TestTube, 
   Archive, 
   Clock, 
-  Award,
   Play,
   Download,
   Utensils,
@@ -38,7 +37,7 @@ import { useState, useEffect } from "react"
 import { Eye, Calendar, Trophy, CheckCircle } from "lucide-react"
 
 // Subject data mapping
-const subjectData: Record<string, { name: string; code: string; level: string; description: string; icon: any; color: string }> = {
+const subjectData: Record<string, { name: string; code: string; level: string; description: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
   // O-Level subjects - Core Subjects
   "4024": { name: "Mathematics", code: "4024", level: "O-Level", description: "Core Mathematics covering algebra, geometry, and statistics", icon: Calculator, color: "bg-blue-500" },
   "4037": { name: "Additional Mathematics", code: "4037", level: "O-Level", description: "Advanced mathematical concepts and problem-solving", icon: Calculator, color: "bg-blue-600" },
@@ -172,7 +171,7 @@ export default function SubjectPage() {
     fetchTestAttempts()
   }, [activeTab, code])
 
-  const handleViewResults = (attempt: any) => {
+  const handleViewResults = (attempt: { test: { id: string }; id: string }) => {
     router.push(`/tests/${attempt.test.id}?viewResults=${attempt.id}`)
   }
 
@@ -339,7 +338,7 @@ export default function SubjectPage() {
                     <div className="text-center py-8 bg-slate-50 rounded-lg">
                       <TestTube className="h-12 w-12 text-slate-400 mx-auto mb-4" />
                       <h4 className="text-lg font-semibold text-slate-900 mb-2">No Tests Yet</h4>
-                      <p className="text-slate-600 mb-4">You haven't taken any tests for this subject yet.</p>
+                      <p className="text-slate-600 mb-4">You haven&apos;t taken any tests for this subject yet.</p>
                       <button 
                         onClick={() => router.push(`/subjects/${code}/generate-test`)}
                         className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"

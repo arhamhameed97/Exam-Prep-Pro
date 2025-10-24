@@ -3,15 +3,10 @@
 import Link from "next/link"
 import { 
   Clock, 
-  Trophy, 
   BookOpen, 
   Target, 
   TrendingUp, 
   TrendingDown,
-  CheckCircle,
-  XCircle,
-  Star,
-  Calendar,
   Award,
   Brain,
   Zap,

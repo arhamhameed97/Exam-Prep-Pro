@@ -82,7 +82,7 @@ export default function PastPapersPage() {
             <Archive className="h-16 w-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-900 mb-2">Past Papers Coming Soon</h3>
             <p className="text-slate-600 mb-6">
-              We're working on adding past papers for all O/A Level subjects. This feature will be available in the next update.
+              We&apos;re working on adding past papers for all O/A Level subjects. This feature will be available in the next update.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">

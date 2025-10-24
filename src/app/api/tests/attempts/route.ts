@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    if (!(session as { user?: { id: string } })?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     // Fetch test attempts for this subject
     const attempts = await prisma.testAttempt.findMany({
       where: {
-        userId: session.user.id,
+        userId: (session as { user: { id: string } }).user.id,
         test: {
           subjectId: subject.id
         },

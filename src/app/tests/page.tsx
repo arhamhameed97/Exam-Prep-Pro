@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Calendar, Clock, Award, Play, TestTube, TrendingUp, Filter, Search } from "lucide-react"
+import { Calendar, Clock, Award, Play, TestTube, TrendingUp } from "lucide-react"
 
 async function getUserTests(userId: string) {
   try {
@@ -37,6 +37,9 @@ async function getTestStats(userId: string) {
       where: {
         userId,
         status: 'completed'
+      },
+      include: {
+        test: true
       }
     })
 
@@ -80,13 +83,13 @@ async function getTestStats(userId: string) {
 export default async function TestsPage() {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user?.id) {
+  if (!(session as { user?: { id: string } })?.user?.id) {
     redirect('/auth/signin')
   }
 
   const [tests, stats] = await Promise.all([
-    getUserTests(session.user.id),
-    getTestStats(session.user.id)
+    getUserTests((session as { user: { id: string } }).user.id),
+    getTestStats((session as { user: { id: string } }).user.id)
   ])
 
   return (

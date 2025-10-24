@@ -63,8 +63,8 @@ export function prepareSecureQuestionData(question: Question): SecureQuestionDat
     questionType: question.questionType,
     marks: question.marks,
     difficulty: question.difficulty,
-    topic: question.topic,
-    explanation: question.explanation
+    topic: question.topic || null,
+    explanation: question.explanation || null
   }
 }
 

@@ -4,27 +4,20 @@ import {
   BookOpen, 
   Plus, 
   TrendingUp, 
-  Clock, 
   Target, 
   Award, 
-  Brain,
-  Zap,
   Star,
-  Calendar,
   BarChart3,
   Trophy,
   ChevronRight,
   Search,
-  Filter,
   Grid,
   List,
   MoreVertical,
-  Edit,
-  Trash2,
   Eye,
   Play
 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import AddSubjectModal from "./add-subject-modal"
 
@@ -132,12 +125,12 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
       
       if (data.success) {
         // Transform the data to match our interface
-        const transformedSubjects = data.subjects.map((subject: any) => {
-          const allAttempts = subject.tests?.flatMap((test: any) => test.attempts || []) || []
-          const completedAttempts = allAttempts.filter((attempt: any) => attempt.status === 'completed')
+        const transformedSubjects = data.subjects.map((subject: { id: string; name: string; code: string; level: string; description?: string; updatedAt: Date; tests?: Array<{ attempts?: Array<{ status: string; score: number; timeSpent: number; test: { totalMarks: number } }> }> }) => {
+          const allAttempts = subject.tests?.flatMap((test: { attempts?: Array<{ status: string; score: number; timeSpent: number; test: { totalMarks: number } }> }) => test.attempts || []) || []
+          const completedAttempts = allAttempts.filter((attempt: { status: string }) => attempt.status === 'completed')
           
           const totalTests = subject.tests?.length || 0
-          const totalTimeSpent = completedAttempts.reduce((sum: number, attempt: any) => sum + (attempt.timeSpent || 0), 0)
+          const totalTimeSpent = completedAttempts.reduce((sum: number, attempt: { timeSpent: number }) => sum + (attempt.timeSpent || 0), 0)
           
           // Calculate average and best scores as percentages
           let averageScore = 0
@@ -145,9 +138,8 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
           
           if (completedAttempts.length > 0) {
             // Get the total marks for each test to convert raw scores to percentages
-            const scoresWithPercentages = completedAttempts.map((attempt: any) => {
-              const test = subject.tests?.find((t: any) => t.id === attempt.testId)
-              const totalMarks = test?.totalMarks || 10 // Default to 10 if not found
+            const scoresWithPercentages = completedAttempts.map((attempt: { score: number; test: { totalMarks: number } }) => {
+              const totalMarks = attempt.test.totalMarks || 10 // Default to 10 if not found
               return ((attempt.score || 0) / totalMarks) * 100
             })
             
@@ -253,7 +245,7 @@ export default function MySubjects({ subjects: initialSubjects }: MySubjectsProp
           {/* Sort */}
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as 'recent' | 'performance' | 'name' | 'tests')}
             className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
           >
             <option value="recent">Most Recent</option>

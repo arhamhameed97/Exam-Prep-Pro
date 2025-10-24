@@ -150,7 +150,7 @@ export async function generateTestQuestions(request: TestGenerationRequest): Pro
         const subjectName = request.subjectName.toLowerCase()
         
         // Check for obvious subject mismatches (only flag if clearly wrong)
-        const wrongSubjectPatterns = {
+        const wrongSubjectPatterns: Record<string, string[]> = {
           'mathematics': ['capital of', 'country', 'geography', 'history', 'biology', 'chemistry'],
           'physics': ['capital of', 'country', 'geography', 'history', 'biology', 'chemistry'],
           'chemistry': ['capital of', 'country', 'geography', 'history', 'biology', 'physics'],
