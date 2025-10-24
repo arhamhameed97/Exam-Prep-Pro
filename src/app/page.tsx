@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import Link from "next/link"
-import { BookOpen, Brain, Users, Trophy } from "lucide-react"
+import { BookOpen, Brain, Users, Trophy, Play } from "lucide-react"
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -74,12 +74,22 @@ export default function Home() {
               Start Free Trial
             </Link>
             <Link
+              href="/demo"
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            >
+              <Play className="h-5 w-5" />
+              Try Demo (No Login)
+            </Link>
+            <Link
               href="/auth/signin"
               className="border border-indigo-600 text-indigo-600 px-8 py-3 rounded-lg text-lg font-medium hover:bg-indigo-50 transition-colors"
             >
               Sign In
             </Link>
           </div>
+          <p className="mt-4 text-sm text-gray-500 text-center">
+            🎯 Try the demo to explore all features without signing up!
+          </p>
         </div>
 
         {/* Features */}
