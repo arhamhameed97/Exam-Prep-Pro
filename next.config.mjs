@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Optimize for Vercel deployment
-  output: 'standalone',
+  // Remove standalone output to fix Prisma on Vercel
+  // output: 'standalone',
   
   // Enable experimental features for better performance
   experimental: {
@@ -31,32 +31,10 @@ const nextConfig = {
   poweredByHeader: false,
 
   // Webpack optimization
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Optimize bundle size
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-          prisma: {
-            test: /[\\/]node_modules[\\/]@prisma[\\/]/,
-            name: 'prisma',
-            chunks: 'all',
-          },
-        },
-      }
-    }
-
-    // Prisma fix for Vercel serverless
+  webpack: (config, { isServer }) => {
+    // Prisma configuration for Vercel
     if (isServer) {
-      config.externals = config.externals || []
-      config.externals.push({
-        '.prisma/client/index-browser': '@prisma/client/index-browser',
-      })
+      config.externals = [...(config.externals || []), '_http_common']
     }
 
     return config
