@@ -59,7 +59,6 @@ export default function TestPage() {
   const [secureQuestions, setSecureQuestions] = useState<SecureQuestionData[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<{ [questionId: string]: string }>({})
-  const [feedback, setFeedback] = useState<{ [questionId: string]: string }>({})
   const [timeLeft, setTimeLeft] = useState(0)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const [isTestCompleted, setIsTestCompleted] = useState(false)
@@ -70,6 +69,7 @@ export default function TestPage() {
   // Load test data
   useEffect(() => {
     loadTestData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testId])
 
   // Check for viewResults query parameter
@@ -101,6 +101,7 @@ export default function TestPage() {
     return () => {
       if (interval) clearInterval(interval)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTimerRunning, timeLeft])
 
   const loadTestData = async () => {
@@ -233,7 +234,7 @@ export default function TestPage() {
 
     // Remove instant feedback - only store the answer
     // Feedback will be shown after test submission
-  }, [secureQuestions])
+  }, [])
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < secureQuestions.length - 1) {
@@ -305,7 +306,6 @@ export default function TestPage() {
 
   const resetTest = () => {
     setAnswers({})
-    setFeedback({})
     setCurrentQuestionIndex(0)
     setTimeLeft(test?.duration ? test.duration * 60 : 0)
     setIsTimerRunning(false)
@@ -355,7 +355,6 @@ export default function TestPage() {
 
   const currentQuestion = secureQuestions[currentQuestionIndex]
   const currentAnswer = answers[currentQuestion?.id || '']
-  const currentFeedback = feedback[currentQuestion?.id || '']
 
   if (isTestCompleted && testResult) {
     return (

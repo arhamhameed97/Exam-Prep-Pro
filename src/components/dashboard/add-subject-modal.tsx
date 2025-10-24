@@ -35,6 +35,7 @@ export default function AddSubjectModal({ isOpen, onClose, onSubjectAdded }: Add
     if (isOpen) {
       fetchAvailableSubjects()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, level])
 
   const fetchAvailableSubjects = async () => {
@@ -49,7 +50,7 @@ export default function AddSubjectModal({ isOpen, onClose, onSubjectAdded }: Add
       } else {
         setError(data.message || 'Failed to fetch subjects')
       }
-    } catch (error) {
+    } catch {
       setError('Failed to fetch subjects')
     } finally {
       setLoading(false)
@@ -80,7 +81,7 @@ export default function AddSubjectModal({ isOpen, onClose, onSubjectAdded }: Add
       } else {
         setError(data.message || 'Failed to add subject')
       }
-    } catch (error) {
+    } catch {
       setError('Failed to add subject')
     } finally {
       setAdding(null)
