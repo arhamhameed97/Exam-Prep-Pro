@@ -1,10 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
-  engineType = "library"
+  engineType    = "library"
 }
 
 datasource db {
@@ -25,8 +22,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -40,21 +36,20 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String        @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  level         String    @default("student")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts Account[]
-  sessions Session[]
-  subjects Subject[]
-  tests    Test[]
-  attempts TestAttempt[]
+  level         String        @default("student")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  subjects      Subject[]
+  attempts      TestAttempt[]
+  tests         Test[]
 }
 
 model VerificationToken {
@@ -73,57 +68,50 @@ model Subject {
   code        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  tests Test[]
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tests       Test[]
 
   @@unique([code, userId])
   @@map("subjects")
 }
 
 model Test {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   title         String
   description   String?
-  type          String   @default("practice") // practice, mock, past-paper
-  difficulty    String   @default("medium")   // easy, medium, hard
-  duration      Int      @default(60)         // minutes
-  totalMarks    Int      @default(100)
-  isActive      Boolean  @default(true)
-  isAIGenerated Boolean  @default(false)      // true for AI-generated tests
-  topics        String?                       // JSON string of selected topics
-  questionTypes String?                       // JSON string of selected question types
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  subjectId String
-  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  questions Question[]
-  attempts  TestAttempt[]
+  type          String        @default("practice")
+  difficulty    String        @default("medium")
+  duration      Int           @default(60)
+  totalMarks    Int           @default(100)
+  isActive      Boolean       @default(true)
+  isAIGenerated Boolean       @default(false)
+  topics        String?
+  questionTypes String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  subjectId     String
+  userId        String
+  questions     Question[]
+  attempts      TestAttempt[]
+  subject       Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tests")
 }
 
 model TestAttempt {
-  id           String   @id @default(cuid())
-  score        Float
-  grade        String
-  timeSpent    Int      // minutes
-  answers      String?  // JSON string of user's answers
-  completedAt  DateTime @default(now())
-  status       String   @default("completed") // completed, in-progress, abandoned
-
-  testId String
-  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  score       Float
+  grade       String
+  timeSpent   Int
+  completedAt DateTime @default(now())
+  status      String   @default("completed")
+  testId      String
+  userId      String
+  answers     String?
+  test        Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("test_attempts")
 }
@@ -131,18 +119,17 @@ model TestAttempt {
 model Question {
   id            String   @id @default(cuid())
   questionText  String
-  options       String   // JSON string of answer options
-  correctAnswer String   // The correct answer (A, B, C, D, etc.)
-  explanation   String?  // Explanation for the correct answer
+  options       String
+  correctAnswer String
+  explanation   String?
   marks         Int      @default(1)
-  difficulty    String   @default("medium") // easy, medium, hard
-  topic         String?  // Topic or chapter this question belongs to
-  questionType  String   @default("mcq")    // mcq, short-answer, long-answer, essay, true-false, fill-blanks
+  difficulty    String   @default("medium")
+  topic         String?
+  questionType  String   @default("mcq")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
-  testId String
-  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId        String
+  test          Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
 
   @@map("questions")
 }
@@ -151,8 +138,8 @@ model PastPaper {
   id          String   @id @default(cuid())
   title       String
   year        Int
-  month       String   // May, Oct, etc.
-  paperType   String   // Paper 1, Paper 2, etc.
+  month       String
+  paperType   String
   subjectCode String
   url         String?
   content     String?
