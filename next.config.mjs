@@ -35,6 +35,12 @@ const nextConfig = {
     // Prisma configuration for Vercel
     if (isServer) {
       config.externals = [...(config.externals || []), '_http_common']
+      
+      // Ensure Prisma client is properly bundled
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@prisma/client': '@prisma/client'
+      }
     }
 
     return config
