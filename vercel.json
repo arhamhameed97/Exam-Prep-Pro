@@ -17,7 +17,8 @@
   "build": {
     "env": {
       "NODE_ENV": "production",
-      "PRISMA_GENERATE_DATAPROXY": "false"
+      "PRISMA_GENERATE_DATAPROXY": "false",
+      "PRISMA_CLI_BINARY_TARGETS": "rhel-openssl-3.0.x"
     }
   },
   "headers": [
