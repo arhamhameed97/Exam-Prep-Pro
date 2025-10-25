@@ -9,9 +9,6 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30,
       "includeFiles": "node_modules/.prisma/client/**"
-    },
-    "src/lib/**/*.ts": {
-      "includeFiles": "node_modules/.prisma/client/**"
     }
   },
   "env": {
@@ -19,7 +16,8 @@
   },
   "build": {
     "env": {
-      "NODE_ENV": "production"
+      "NODE_ENV": "production",
+      "PRISMA_GENERATE_DATAPROXY": "false"
     }
   },
   "headers": [
