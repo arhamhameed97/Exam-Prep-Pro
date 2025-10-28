@@ -18,6 +18,9 @@ const missingEnvVars = Object.entries(requiredEnvVars)
 
 if (missingEnvVars.length > 0) {
   console.error("Missing required environment variables:", missingEnvVars)
+  console.error("DATABASE_URL:", process.env.DATABASE_URL ? '✅ Set' : '❌ Missing')
+  console.error("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? '✅ Set' : '❌ Missing')
+  console.error("NEXTAUTH_URL:", process.env.NEXTAUTH_URL || '❌ Missing')
   console.error("Please set these variables in your Vercel dashboard")
 }
 
