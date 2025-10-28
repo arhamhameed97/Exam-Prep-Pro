@@ -281,98 +281,92 @@ export default async function Dashboard() {
         {/* Compact Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Tests Card */}
-          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-indigo-200 transition-all duration-300 hover:-translate-y-0.5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
-                <BookOpen className="h-5 w-5 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                  {stats.totalTests}
+          <div className="group relative bg-gradient-to-br from-white to-slate-50 rounded-2xl p-4 shadow-sm border border-slate-200 hover:shadow-xl hover:border-blue-300 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+            
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-sm group-hover:shadow-md transition-all duration-300">
+                  <BookOpen className="h-4 w-4 text-white" />
                 </div>
-                <div className="text-xs text-slate-500">Available</div>
+                <div>
+                  <div className="text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    {stats.totalTests}
+                  </div>
+                  <div className="text-xs font-medium text-slate-600">Total Tests</div>
+                </div>
               </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Total Tests</span>
-                <TrendingUp className="h-3 w-3 text-green-500" />
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-1.5 rounded-full transition-all duration-500" style={{ width: '100%' }}></div>
-              </div>
+              <TrendingUp className="h-4 w-4 text-blue-400" />
             </div>
           </div>
 
           {/* Completed Tests Card */}
-          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-green-200 transition-all duration-300 hover:-translate-y-0.5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
-                <Users className="h-5 w-5 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-900 group-hover:text-green-600 transition-colors">
-                  {stats.completedTests}
+          <div className="group relative bg-gradient-to-br from-white to-slate-50 rounded-2xl p-4 shadow-sm border border-slate-200 hover:shadow-xl hover:border-green-300 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+            
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-sm group-hover:shadow-md transition-all duration-300">
+                  <Users className="h-4 w-4 text-white" />
                 </div>
-                <div className="text-xs text-slate-500">Completed</div>
+                <div>
+                  <div className="text-2xl font-bold text-slate-900 group-hover:text-green-600 transition-colors">
+                    {stats.completedTests}
+                  </div>
+                  <div className="text-xs font-medium text-slate-600">Tests Taken</div>
+                </div>
               </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Tests Taken</span>
-                <Target className="h-3 w-3 text-green-500" />
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
-                <div className="bg-gradient-to-r from-green-500 to-green-600 h-1.5 rounded-full transition-all duration-500" 
-                     style={{ width: `${stats.totalTests > 0 ? (stats.completedTests / stats.totalTests) * 100 : 0}%` }}></div>
-              </div>
+              <Target className="h-4 w-4 text-green-400" />
             </div>
           </div>
 
           {/* Average Time Card */}
-          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-yellow-200 transition-all duration-300 hover:-translate-y-0.5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
-                <Clock className="h-5 w-5 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-900 group-hover:text-yellow-600 transition-colors">
-                  {stats.averageTime > 0 ? `${stats.averageTime}m` : '-'}
+          <div className="group relative bg-gradient-to-br from-white to-slate-50 rounded-2xl p-4 shadow-sm border border-slate-200 hover:shadow-xl hover:border-amber-300 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+            
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-sm group-hover:shadow-md transition-all duration-300">
+                  <Clock className="h-4 w-4 text-white" />
                 </div>
-                <div className="text-xs text-slate-500">Average</div>
+                <div>
+                  <div className="text-2xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
+                    {stats.averageTime > 0 ? `${stats.averageTime}m` : '—'}
+                  </div>
+                  <div className="text-xs font-medium text-slate-600">Time Per Test</div>
+                </div>
               </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Time Per Test</span>
-                <BarChart3 className="h-3 w-3 text-yellow-500" />
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
-                <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 h-1.5 rounded-full transition-all duration-500" 
-                     style={{ width: `${Math.min((stats.averageTime / 30) * 100, 100)}%` }}></div>
-              </div>
+              <BarChart3 className="h-4 w-4 text-amber-400" />
             </div>
           </div>
 
           {/* Average Score Card */}
-          <div className="group bg-white rounded-xl p-4 shadow-sm border border-slate-200 hover:shadow-lg hover:border-purple-200 transition-all duration-300 hover:-translate-y-0.5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300">
-                <Trophy className="h-5 w-5 text-white" />
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
-                  {stats.averageScore > 0 ? `${stats.averageScore}%` : '-'}
+          <div className="group relative bg-gradient-to-br from-white to-slate-50 rounded-2xl p-4 shadow-sm border border-slate-200 hover:shadow-xl hover:border-purple-300 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-full blur-2xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+            
+            <div className="relative">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-sm group-hover:shadow-md transition-all duration-300">
+                    <Trophy className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
+                      {stats.averageScore > 0 ? `${stats.averageScore}%` : '—'}
+                    </div>
+                    <div className="text-xs font-medium text-slate-600">Average Score</div>
+                  </div>
                 </div>
-                <div className="text-xs text-slate-500">Avg Score</div>
+                <Star className="h-4 w-4 text-purple-400" />
               </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Grade: {stats.averageGrade}</span>
-                <Star className="h-3 w-3 text-purple-500" />
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-slate-500">Grade: {stats.averageGrade}</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
+              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                 <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-1.5 rounded-full transition-all duration-500" 
                      style={{ width: `${stats.averageScore}%` }}></div>
               </div>

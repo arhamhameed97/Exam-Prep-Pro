@@ -44,10 +44,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate number of questions (5-50 range)
-    if (numberOfQuestions < 5 || numberOfQuestions > 50) {
+    // Validate number of questions (1-10 range)
+    if (numberOfQuestions < 1 || numberOfQuestions > 10) {
       return NextResponse.json(
-        { message: "Number of questions must be between 5 and 50" },
+        { message: "Number of questions must be between 1 and 10" },
         { status: 400 }
       )
     }

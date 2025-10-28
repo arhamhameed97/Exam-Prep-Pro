@@ -310,7 +310,8 @@ export function getInstantFeedback(
 }
 
 /**
- * Calculate score for a test attempt
+ * Calculate score for a test attempt (MCQ questions only)
+ * Non-MCQ questions will be graded by AI in the backend
  */
 export function calculateTestScore(
   answers: { [questionId: string]: string },
@@ -320,28 +321,41 @@ export function calculateTestScore(
   totalMarks: number
   correctAnswers: number
   totalQuestions: number
+  mcqScore: number
+  mcqTotalMarks: number
 } {
   let correctAnswers = 0
   let totalMarks = 0
+  let mcqScore = 0
+  let mcqTotalMarks = 0
   
   questions.forEach(question => {
     totalMarks += question.marks
     
-    const userAnswer = answers[question.id]
-    if (userAnswer) {
-      const result = validateAnswer(userAnswer, question.questionType, question.encryptedAnswer)
-      if (result.isCorrect) {
-        correctAnswers++
+    // Only calculate score for MCQ and true-false questions
+    if (question.questionType === 'mcq' || question.questionType === 'multiple-choice' || question.questionType === 'true-false') {
+      mcqTotalMarks += question.marks
+      
+      const userAnswer = answers[question.id]
+      if (userAnswer) {
+        const result = validateAnswer(userAnswer, question.questionType, question.encryptedAnswer)
+        if (result.isCorrect) {
+          correctAnswers++
+          mcqScore += question.marks
+        }
       }
     }
   })
   
-  const score = totalMarks > 0 ? (correctAnswers / questions.length) * totalMarks : 0
+  // For now, return MCQ score only - AI grading will be handled in backend
+  const score = mcqScore
   
   return {
     score: Math.round(score * 100) / 100, // Round to 2 decimal places
     totalMarks,
     correctAnswers,
-    totalQuestions: questions.length
+    totalQuestions: questions.length,
+    mcqScore,
+    mcqTotalMarks
   }
 }

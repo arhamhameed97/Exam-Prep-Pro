@@ -142,11 +142,11 @@ export default function GenerateTestPage() {
     subjectCode: code,
     subjectName: subject?.name || '',
     subjectLevel: subject?.level || '',
-    numberOfQuestions: 10,
+    numberOfQuestions: 5,
     difficulty: 'medium',
     topics: [],
     questionTypes: [],
-    duration: 20
+    duration: 15
   })
   
   const [isGenerating, setIsGenerating] = useState(false)
@@ -293,344 +293,376 @@ export default function GenerateTestPage() {
 
   return (
     <DashboardLayout>
-      <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 overflow-hidden">
-        <div className="h-full flex flex-col p-4 space-y-4">
-          {/* Compact Header */}
-          <div className="relative overflow-hidden flex-shrink-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 opacity-10 rounded-2xl"></div>
-            <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => router.back()}
-                    className="p-2 hover:bg-slate-100 rounded-lg transition-all duration-200"
-            >
-              <ArrowLeft className="h-5 w-5 text-slate-600" />
-            </button>
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-3 rounded-xl ${subject.color} shadow-md`}>
-                      <IconComponent className="h-6 w-6 text-white" />
+      <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-500/20 to-cyan-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+
+        <div className="relative h-full flex flex-col p-6 space-y-6">
+          {/* Modern Header */}
+          <div className="flex-shrink-0">
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  <button
+                    onClick={() => router.back()}
+                    className="p-3 hover:bg-white/10 rounded-xl transition-all duration-300 group"
+                  >
+                    <ArrowLeft className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
+                  </button>
+                  
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-4 rounded-2xl ${subject.color} shadow-lg ring-4 ring-white/10`}>
+                      <IconComponent className="h-8 w-8 text-white" />
                     </div>
-            <div>
-                      <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                    <div>
+                      <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                         Generate AI Test
                       </h1>
-                      <p className="text-slate-600 text-sm">Create a custom practice test using AI</p>
-            </div>
-          </div>
-        </div>
-                <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full">
-                  <Sparkles className="h-4 w-4 text-indigo-600" />
-                  <span className="text-xs font-medium text-indigo-700">AI Powered</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          {/* Compact Configuration Form */}
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex-1">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-slate-50 to-indigo-50 p-4 border-b border-slate-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-indigo-100 rounded-lg">
-                    <Settings className="h-5 w-5 text-indigo-600" />
-            </div>
-            <div>
-                    <h3 className="text-lg font-bold text-slate-900">Test Configuration</h3>
-                    <p className="text-slate-600 text-sm">Customize your AI-generated test</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-slate-600">{subject.name} ({subject.code})</span>
-                  <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
-                  {subject.level}
-                </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 flex-1 overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
-                {/* Left Column - Basic Settings */}
-                <div className="space-y-4">
-                  {/* Number of Questions */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="p-1.5 bg-blue-100 rounded-lg">
-                        <BarChart3 className="h-4 w-4 text-blue-600" />
-          </div>
-                      <h4 className="text-sm font-semibold text-slate-900">Questions</h4>
-          </div>
-                <div className="space-y-2">
-                      <div className="relative">
-                  <input
-                    type="range"
-                    min="5"
-                    max="50"
-                    value={config.numberOfQuestions}
-                    onChange={(e) => setConfig(prev => ({ ...prev, numberOfQuestions: parseInt(e.target.value) }))}
-                          className="w-full h-2 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #3b82f6 0%, #6366f1 ${(config.numberOfQuestions - 5) / 45 * 100}%, #e2e8f0 ${(config.numberOfQuestions - 5) / 45 * 100}%, #e2e8f0 100%)`
-                          }}
-                        />
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-slate-900">{config.numberOfQuestions}</div>
-                        <div className="text-xs text-slate-600">questions</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Difficulty Level */}
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="p-1.5 bg-green-100 rounded-lg">
-                        <Target className="h-4 w-4 text-green-600" />
-                      </div>
-                      <h4 className="text-sm font-semibold text-slate-900">Difficulty</h4>
+                      <p className="text-white/70 text-sm font-medium">Create a custom practice test using AI</p>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                  {(['easy', 'medium', 'hard'] as const).map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setConfig(prev => ({ ...prev, difficulty: level }))}
-                          className={`p-2 rounded-lg border-2 transition-all duration-200 text-xs ${
-                        config.difficulty === level
-                              ? 'border-green-500 bg-green-100 text-green-700 shadow-md'
-                              : 'border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                          <div className="capitalize font-semibold text-center">{level}</div>
-                    </button>
-                  ))}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full border border-indigo-400/30">
+                    <Sparkles className="h-4 w-4 text-indigo-400" />
+                    <span className="text-sm font-semibold text-indigo-300">AI Powered</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-white/60">{subject.name}</div>
+                    <div className="text-xs text-white/40">{subject.code} • {subject.level}</div>
+                  </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+
+          {/* Main Configuration Panel */}
+          <div className="flex-1 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+            <div className="h-full flex">
+              {/* Left Panel - Basic Settings */}
+              <div className="w-80 bg-white/5 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col space-y-6">
+                {/* Questions Count */}
+                <div className="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-2xl p-5 border border-blue-400/20">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="p-2 bg-blue-500/20 rounded-xl">
+                      <BarChart3 className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Questions</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        value={config.numberOfQuestions}
+                        onChange={(e) => setConfig(prev => ({ ...prev, numberOfQuestions: parseInt(e.target.value) }))}
+                        className="w-full h-3 bg-gradient-to-r from-blue-500/30 to-indigo-500/30 rounded-full appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #3b82f6 0%, #6366f1 ${(config.numberOfQuestions - 1) / 9 * 100}%, rgba(255,255,255,0.1) ${(config.numberOfQuestions - 1) / 9 * 100}%, rgba(255,255,255,0.1) 100%)`
+                        }}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-white">{config.numberOfQuestions}</div>
+                      <div className="text-sm text-white/60">questions</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Difficulty and Duration Combined - Full Height */}
+                <div className="flex-1 flex flex-col space-y-6">
+                  {/* Difficulty */}
+                  <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-2xl p-5 border border-green-400/20 flex-1 flex flex-col justify-center">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-green-500/20 rounded-xl">
+                        <Target className="h-5 w-5 text-green-400" />
+                      </div>
+                      <h3 className="text-lg font-bold text-white">Difficulty</h3>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {(['easy', 'medium', 'hard'] as const).map((level) => (
+                        <button
+                          key={level}
+                          onClick={() => setConfig(prev => ({ ...prev, difficulty: level }))}
+                          className={`p-3 rounded-xl border-2 transition-all duration-300 text-sm font-semibold ${
+                            config.difficulty === level
+                              ? 'border-green-400 bg-green-500/20 text-green-300 shadow-lg'
+                              : 'border-white/20 hover:border-white/40 text-white/70 hover:bg-white/5'
+                          }`}
+                        >
+                          <div className="capitalize">{level}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* Duration */}
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="p-1.5 bg-purple-100 rounded-lg">
-                        <Timer className="h-4 w-4 text-purple-600" />
+                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl p-5 border border-purple-400/20 flex-1 flex flex-col justify-center">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-2 bg-purple-500/20 rounded-xl">
+                        <Timer className="h-5 w-5 text-purple-400" />
                       </div>
-                      <h4 className="text-sm font-semibold text-slate-900">Duration</h4>
-                </div>
-                    <div className="space-y-2">
-                <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
-                  <input
-                    type="number"
-                    min="5"
-                    max="300"
-                    value={config.duration}
-                    onChange={(e) => setConfig(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                          className="w-full pl-8 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                      <h3 className="text-lg font-bold text-white">Duration</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+                        <input
+                          type="number"
+                          min="5"
+                          max="300"
+                          value={config.duration}
+                          onChange={(e) => setConfig(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                          className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-transparent text-white placeholder-white/40"
+                          placeholder="20"
                         />
                       </div>
-                      <div className="text-xs text-purple-600 text-center">
+                      <div className="text-sm text-purple-300 text-center">
                         Auto: {config.numberOfQuestions + 10} min
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Middle Column - Topics */}
-                <div className="space-y-4">
-                  {/* Topics Selection */}
-                  <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-4 h-full flex flex-col">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="p-1.5 bg-orange-100 rounded-lg">
-                          <BookOpen className="h-4 w-4 text-orange-600" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-semibold text-slate-900">Topics</h4>
-                          <p className="text-xs text-slate-600">{config.topics.length} of {availableTopics.length} selected</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={handleSelectAllTopics}
-                          className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-xs font-medium transition-colors"
-                        >
-                          All
-                        </button>
-                        <button
-                          onClick={handleDeselectAllTopics}
-                          className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium transition-colors"
-                        >
-                          Clear
-                        </button>
-              </div>
-            </div>
-
-                    {/* Search Topics */}
-                    <div className="relative mb-3">
-                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-slate-400" />
-                      <input
-                        type="text"
-                        placeholder="Search topics..."
-                        value={topicSearchQuery}
-                        onChange={(e) => setTopicSearchQuery(e.target.value)}
-                        className="w-full pl-7 pr-3 py-1.5 border border-slate-200 rounded text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    {/* Topics List */}
-                    <div className="flex-1 overflow-y-auto border border-slate-200 rounded bg-white">
-                      <div className="p-2 space-y-1">
-                        {filteredTopics.map((topic) => (
-                          <label key={topic} className="flex items-center space-x-2 p-2 hover:bg-slate-50 rounded cursor-pointer transition-colors group">
-                            <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={config.topics.includes(topic)}
-                        onChange={() => handleTopicToggle(topic)}
-                                className="sr-only"
-                              />
-                              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
-                                config.topics.includes(topic)
-                                  ? 'bg-orange-500 border-orange-500 text-white'
-                                  : 'border-slate-300 group-hover:border-orange-400'
-                              }`}>
-                                {config.topics.includes(topic) && <CheckSquare className="h-2.5 w-2.5" />}
-                              </div>
-                            </div>
-                            <span className="text-xs text-slate-700 group-hover:text-slate-900 font-medium">{topic}</span>
-                    </label>
-                  ))}
-                </div>
               </div>
 
-              {config.topics.length === 0 && (
-                      <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
-                        <div className="flex items-center space-x-1">
-                          <Lightbulb className="h-3 w-3 text-amber-600" />
-                          <span className="text-xs text-amber-700 font-medium">Select at least one topic</span>
-                        </div>
-                      </div>
-              )}
-            </div>
-          </div>
-
-                {/* Right Column - Question Types & Generate */}
-                <div className="space-y-4">
-                  {/* Question Types */}
-                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-4 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="p-1.5 bg-cyan-100 rounded-lg">
-                          <FileText className="h-4 w-4 text-cyan-600" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-semibold text-slate-900">Question Types</h4>
-                          <p className="text-xs text-slate-600">{config.questionTypes.length} of {availableQuestionTypes.length} selected</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={handleSelectAllQuestionTypes}
-                          className="px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-xs font-medium transition-colors"
-                        >
-                          All
-                        </button>
-                        <button
-                          onClick={handleDeselectAllQuestionTypes}
-                          className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-medium transition-colors"
-                        >
-                          Clear
-                        </button>
-                      </div>
+              {/* Center Panel - Topics */}
+              <div className="flex-1 bg-white/5 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-orange-500/20 rounded-xl">
+                      <BookOpen className="h-5 w-5 text-orange-400" />
                     </div>
-
-                    <div className="flex-1 overflow-y-auto space-y-1">
-                      {availableQuestionTypes.map((questionType) => (
-                        <label key={questionType} className="flex items-start space-x-2 p-2 hover:bg-white rounded cursor-pointer border border-slate-200 transition-all hover:shadow-sm">
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              checked={config.questionTypes.includes(questionType)}
-                              onChange={() => handleQuestionTypeToggle(questionType)}
-                              className="sr-only"
-                            />
-                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
-                              config.questionTypes.includes(questionType)
-                                ? 'bg-cyan-500 border-cyan-500 text-white'
-                                : 'border-slate-300'
-                            }`}>
-                              {config.questionTypes.includes(questionType) && <CheckSquare className="h-2.5 w-2.5" />}
-                            </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Topics</h3>
+                      <p className="text-sm text-white/60">{config.topics.length} of {availableTopics.length} selected</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handleSelectAllTopics}
+                      className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-lg text-sm font-medium transition-all duration-200"
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={handleDeselectAllTopics}
+                      className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg text-sm font-medium transition-all duration-200"
+                    >
+                      Clear
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-1">
-                            <div className="text-xs font-medium text-slate-900">{QUESTION_TYPES[questionType].label}</div>
-                            <div className="text-xs text-slate-600">{QUESTION_TYPES[questionType].description}</div>
+
+                {/* Search */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+                  <input
+                    type="text"
+                    placeholder="Search topics..."
+                    value={topicSearchQuery}
+                    onChange={(e) => setTopicSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-white placeholder-white/40"
+                  />
+                </div>
+
+                {/* Topics Grid */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-2">
+                    {filteredTopics.map((topic) => (
+                      <label key={topic} className="flex items-center space-x-3 p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all duration-200 group border border-white/10 hover:border-white/20">
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={config.topics.includes(topic)}
+                            onChange={() => handleTopicToggle(topic)}
+                            className="sr-only"
+                          />
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                            config.topics.includes(topic)
+                              ? 'bg-orange-500 border-orange-500 text-white'
+                              : 'border-white/30 group-hover:border-orange-400'
+                          }`}>
+                            {config.topics.includes(topic) && <CheckSquare className="h-3 w-3" />}
                           </div>
-                        </label>
-                      ))}
+                        </div>
+                        <span className="text-sm text-white/80 group-hover:text-white font-medium">{topic}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
-                    {config.questionTypes.length === 0 && (
-                      <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
-                        <div className="flex items-center space-x-1">
-                          <Lightbulb className="h-3 w-3 text-amber-600" />
-                          <span className="text-xs text-amber-700 font-medium">Select at least one type</span>
+                {config.topics.length === 0 && (
+                  <div className="mt-4 p-3 bg-amber-500/10 border border-amber-400/30 rounded-xl">
+                    <div className="flex items-center space-x-2">
+                      <Lightbulb className="h-4 w-4 text-amber-400" />
+                      <span className="text-sm text-amber-300 font-medium">Select at least one topic</span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+
+              {/* Right Panel - Question Types & Generate */}
+              <div className="w-80 bg-white/5 backdrop-blur-xl p-6 flex flex-col space-y-6">
+                {/* Question Types */}
+                <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-2xl p-5 border border-cyan-400/20 flex-1 flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-cyan-500/20 rounded-xl">
+                        <FileText className="h-5 w-5 text-cyan-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">Question Types</h3>
+                        <p className="text-sm text-white/60">{config.questionTypes.length} of {availableQuestionTypes.length} selected</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleSelectAllQuestionTypes}
+                        className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-lg text-sm font-medium transition-all duration-200"
+                      >
+                        All
+                      </button>
+                      <button
+                        onClick={handleDeselectAllQuestionTypes}
+                        className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg text-sm font-medium transition-all duration-200"
+                      >
+                        Clear
+                      </button>
+                    </div>
                   </div>
 
-          {/* Generate Button */}
-                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center space-x-2 mb-3">
-                        <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
-                          <Sparkles className="h-4 w-4 text-white" />
+                  <div className="flex-1 overflow-y-auto space-y-3">
+                    {availableQuestionTypes.map((questionType) => (
+                      <label key={questionType} className="flex items-start space-x-3 p-3 hover:bg-white/5 rounded-xl cursor-pointer border border-white/10 hover:border-white/20 transition-all duration-200 group">
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={config.questionTypes.includes(questionType)}
+                            onChange={() => handleQuestionTypeToggle(questionType)}
+                            className="sr-only"
+                          />
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                            config.questionTypes.includes(questionType)
+                              ? 'bg-cyan-500 border-cyan-500 text-white'
+                              : 'border-white/30 group-hover:border-cyan-400'
+                          }`}>
+                            {config.questionTypes.includes(questionType) && <CheckSquare className="h-3 w-3" />}
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900">Ready to Generate?</h4>
-                          <p className="text-xs text-slate-600">Create your personalized AI test</p>
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold text-white group-hover:text-white">{QUESTION_TYPES[questionType].label}</div>
+                          <div className="text-xs text-white/60">{QUESTION_TYPES[questionType].description}</div>
                         </div>
+                      </label>
+                    ))}
+                  </div>
+
+                  {config.questionTypes.length === 0 && (
+                    <div className="mt-4 p-3 bg-amber-500/10 border border-amber-400/30 rounded-xl">
+                      <div className="flex items-center space-x-2">
+                        <Lightbulb className="h-4 w-4 text-amber-400" />
+                        <span className="text-sm text-amber-300 font-medium">Select at least one type</span>
                       </div>
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating || config.topics.length === 0 || config.questionTypes.length === 0}
-                        className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2 text-sm font-semibold"
-            >
-              {isGenerating ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                            <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="h-4 w-4" />
-                  <span>Generate AI Test</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+                    </div>
+                  )}
                 </div>
-          </div>
+
+                {/* Generate Button */}
+                <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-2xl p-5 border border-indigo-400/20">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center space-x-3 mb-4">
+                      <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+                        <Sparkles className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">Ready to Generate?</h3>
+                        <p className="text-sm text-white/60">Create your personalized AI test</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleGenerate}
+                      disabled={isGenerating || config.topics.length === 0 || config.questionTypes.length === 0}
+                      className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-3 text-base font-bold"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                          <span>Generating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-5 w-5" />
+                          <span>Generate AI Test</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Error Display */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex-shrink-0">
-            <div className="flex items-center space-x-2">
-                <svg className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="text-sm text-red-700 font-medium">AI Test Generation Failed</span>
-            </div>
-              <div className="text-sm text-red-600 mt-1">{error}</div>
+            <div className="bg-red-500/10 border border-red-400/30 rounded-2xl p-4 flex-shrink-0 backdrop-blur-xl">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-red-500/20 rounded-xl">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm text-red-300 font-semibold">AI Test Generation Failed</div>
+                  <div className="text-sm text-red-400 mt-1">{error}</div>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
+      
+      {/* Custom Styles */}
+      <style jsx global>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #3b82f6, #6366f1);
+          cursor: pointer;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .slider::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #3b82f6, #6366f1);
+          cursor: pointer;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+        
+        .slider::-moz-range-thumb:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+      `}</style>
     </DashboardLayout>
   )
 }

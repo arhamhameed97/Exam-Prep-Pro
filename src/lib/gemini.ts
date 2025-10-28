@@ -47,12 +47,13 @@ export async function generateTestQuestions(request: TestGenerationRequest): Pro
 
   const maxAttempts = AI_CONFIG.retry.maxAttempts
   let lastError: Error | null = null
+  let currentModel = AI_CONFIG.model
   
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       // Use optimized model with JSON schema for cost reduction
       const model = genAI.getGenerativeModel({ 
-        model: AI_CONFIG.model,
+        model: currentModel,
         generationConfig: {
           temperature: AI_CONFIG.generationConfig.temperature,
           topP: AI_CONFIG.generationConfig.topP,
@@ -182,6 +183,14 @@ export async function generateTestQuestions(request: TestGenerationRequest): Pro
     } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error')
       
+      // Check if model is not found and try fallback model (only on first attempt)
+      if ((lastError.message.includes('not found') || lastError.message.includes('404')) && currentModel === 'gemini-2.0-flash' && attempt === 1) {
+        console.warn(`[AI] Model gemini-2.0-flash not available, trying gemini-2.5-flash`)
+        currentModel = 'gemini-2.5-flash'
+        console.log(`[AI] Falling back to: gemini-2.5-flash`)
+        continue
+      }
+      
       // Don't retry on validation errors
       if (lastError.message.includes('Invalid')) {
         break
@@ -210,35 +219,134 @@ function createOptimizedPrompt(request: TestGenerationRequest): string {
   const topicsText = topics.join(', ')
   const typesText = questionTypes.join(', ')
   
+  // Calculate how many questions per type (distribute evenly)
+  const questionsPerType = Math.floor(numberOfQuestions / questionTypes.length)
+  const extraQuestions = numberOfQuestions % questionTypes.length
+  
+  const distribution = questionTypes.map((type, index) => {
+    const count = index < extraQuestions ? questionsPerType + 1 : questionsPerType
+    return `${type}:${count}`
+  }).join(', ')
+  
   // Ultra-compact prompt to minimize tokens
   return `Create ${numberOfQuestions} ${difficulty} ${subjectLevel} ${subjectName} questions.
 
 Topics: ${topicsText}
-Types: ${typesText}
+Required question types (must include ALL): ${typesText}
+Distribution: ${distribution}
 
 Rules:
 - ${subjectName} only
+- MUST include questions from ALL requested types: ${typesText}
 - MCQ: 4 options A-D, correctAnswer: "A"/"B"/"C"/"D"
-- Others: options: [], correctAnswer: actual answer
+- Short/Long/Essay: options: [], correctAnswer: actual answer text
+- True/False: options: ["True", "False"], correctAnswer: "True" or "False"
+- Fill-blanks: options: [], correctAnswer: actual word/phrase
 - Marks: 1-10, difficulty: ${difficulty}
 - Include explanations
+- Rotate question types to ensure variety
 
 JSON format:
 {
   "questions": [
     {
       "questionText": "Question here",
-      "options": ["A", "B", "C", "D"] or [],
-      "correctAnswer": "A" or "answer",
+      "options": [] or ["True", "False"] or ["A", "B", "C", "D"],
+      "correctAnswer": "actual answer",
       "explanation": "Brief explanation",
       "marks": 2,
       "difficulty": "${difficulty}",
-      "topic": "${topics[0] || 'General'}",
-      "questionType": "mcq"
+      "topic": "topic name",
+      "questionType": "mcq" or "short-answer" or "long-answer" or "essay" or "true-false" or "fill-blanks"
     }
   ]
 }
 
+CRITICAL: Generate questions matching the requested types ${typesText}. Spread them evenly across all types.
+
 Generate ${numberOfQuestions} questions:`
+}
+
+export async function generateAIResponse(prompt: string): Promise<string> {
+  // If Gemini API is not available, throw error immediately
+  if (!genAI) {
+    console.log('Gemini API not available, throwing error')
+    throw new Error('AI service is not configured. Please contact support.')
+  }
+
+  console.log(`[AI] Using model: ${AI_CONFIG.model}`)
+
+  const maxAttempts = AI_CONFIG.retry.maxAttempts
+  let lastError: Error | null = null
+  let currentModel = AI_CONFIG.model
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      // Use optimized model
+      const model = genAI.getGenerativeModel({ 
+        model: currentModel,
+        generationConfig: {
+          temperature: AI_CONFIG.generationConfig.temperature,
+          topP: AI_CONFIG.generationConfig.topP,
+          topK: AI_CONFIG.generationConfig.topK,
+          maxOutputTokens: AI_CONFIG.generationConfig.maxOutputTokens,
+          responseMimeType: AI_CONFIG.generationConfig.responseMimeType
+        }
+      })
+      
+      // Log token usage if enabled
+      if (AI_CONFIG.tracking.logTokenUsage) {
+        console.log(`[AI] Attempt ${attempt}: Generating AI response`)
+      }
+      
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      
+      // Log the raw response for debugging
+      if (AI_CONFIG.tracking.logTokenUsage) {
+        console.log(`[AI] Raw response:`, text.substring(0, 500) + '...')
+      }
+      
+      // Track token usage for cost monitoring
+      trackApiUsage(prompt, text, AI_CONFIG.model)
+      
+      // Log success if tracking enabled
+      if (AI_CONFIG.tracking.logTokenUsage) {
+        console.log(`[AI] Successfully generated AI response`)
+      }
+      
+      return text
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error')
+      
+      // Check if model is not found and try fallback model (only on first attempt)
+      if ((lastError.message.includes('not found') || lastError.message.includes('404')) && currentModel === 'gemini-2.0-flash' && attempt === 1) {
+        console.warn(`[AI] Model gemini-2.0-flash not available, trying gemini-2.5-flash`)
+        currentModel = 'gemini-2.5-flash'
+        console.log(`[AI] Falling back to: gemini-2.5-flash`)
+        continue
+      }
+      
+      // Don't retry on validation errors
+      if (lastError.message.includes('Invalid')) {
+        break
+      }
+      
+      // Calculate delay for exponential backoff
+      if (attempt < maxAttempts) {
+        const delay = Math.min(
+          AI_CONFIG.retry.baseDelay * Math.pow(2, attempt - 1),
+          AI_CONFIG.retry.maxDelay
+        )
+        
+        console.warn(`[AI] Attempt ${attempt} failed, retrying in ${delay}ms:`, lastError.message)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+    }
+  }
+  
+  console.error('Error generating AI response after all attempts:', lastError)
+  throw new Error('Failed to generate AI response. Please try again.')
 }
 

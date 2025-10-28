@@ -65,6 +65,7 @@ export default function TestPage() {
   const [testResult, setTestResult] = useState<TestResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isGrading, setIsGrading] = useState(false)
 
   // Load test data
   useEffect(() => {
@@ -250,30 +251,14 @@ export default function TestPage() {
 
   const handleTestSubmit = useCallback(async () => {
     setIsTimerRunning(false)
+    setIsGrading(true)
     
-    // Calculate test score
+    // Calculate MCQ score only (non-MCQ will be graded by AI)
     const result = calculateTestScore(answers, secureQuestions)
     
-    // Determine grade
-    const percentage = (result.score / result.totalMarks) * 100
-    let grade = 'F'
-    if (percentage >= 90) grade = 'A+'
-    else if (percentage >= 80) grade = 'A'
-    else if (percentage >= 70) grade = 'B'
-    else if (percentage >= 60) grade = 'C'
-    else if (percentage >= 50) grade = 'D'
-
     const timeSpent = test ? Math.max(0, (test.duration * 60) - timeLeft) : 0
 
-    const testResult = {
-      ...result,
-      timeSpent,
-      grade
-    }
-
-    setTestResult(testResult)
-    
-    // Save test attempt to database
+    // Save test attempt to database with AI grading
     try {
       const response = await fetch('/api/tests/submit', {
         method: 'POST',
@@ -282,21 +267,80 @@ export default function TestPage() {
         },
         body: JSON.stringify({
           testId: test?.id,
-          score: result.score,
-          grade,
+          score: result.score, // Initial MCQ score
+          grade: 'Pending', // Will be updated after AI grading
           timeSpent,
-          answers
+          answers,
+          questions: test?.questions // Pass questions for AI grading
         }),
       })
 
       if (response.ok) {
+        const responseData = await response.json()
+        
+        // Use AI grading results if available
+        if (responseData.detailedResults) {
+          const finalScore = responseData.detailedResults.reduce((sum: number, r: any) => sum + r.score, 0)
+          const percentage = (finalScore / result.totalMarks) * 100
+          let grade = 'F'
+          if (percentage >= 90) grade = 'A+'
+          else if (percentage >= 80) grade = 'A'
+          else if (percentage >= 70) grade = 'B'
+          else if (percentage >= 60) grade = 'C'
+          else if (percentage >= 50) grade = 'D'
+
+          const finalTestResult = {
+            score: finalScore,
+            totalMarks: result.totalMarks,
+            correctAnswers: responseData.detailedResults.filter((r: any) => r.isCorrect).length,
+            totalQuestions: result.totalQuestions,
+            timeSpent,
+            grade
+          }
+          
+          setTestResult(finalTestResult)
+        } else {
+          // Fallback to MCQ score only
+          const percentage = (result.score / result.totalMarks) * 100
+          let grade = 'F'
+          if (percentage >= 90) grade = 'A+'
+          else if (percentage >= 80) grade = 'A'
+          else if (percentage >= 70) grade = 'B'
+          else if (percentage >= 60) grade = 'C'
+          else if (percentage >= 50) grade = 'D'
+
+          const testResult = {
+            ...result,
+            timeSpent,
+            grade
+          }
+          
+          setTestResult(testResult)
+        }
+        
         console.log('Test attempt saved successfully')
       }
     } catch (error) {
       console.error('Error saving test attempt:', error)
-      // Don't block the UI if saving fails
+      // Fallback to MCQ score only
+      const percentage = (result.score / result.totalMarks) * 100
+      let grade = 'F'
+      if (percentage >= 90) grade = 'A+'
+      else if (percentage >= 80) grade = 'A'
+      else if (percentage >= 70) grade = 'B'
+      else if (percentage >= 60) grade = 'C'
+      else if (percentage >= 50) grade = 'D'
+
+      const testResult = {
+        ...result,
+        timeSpent,
+        grade
+      }
+      
+      setTestResult(testResult)
     }
     
+    setIsGrading(false)
     setIsTestCompleted(true)
   }, [answers, secureQuestions, test, timeLeft])
 
@@ -328,6 +372,20 @@ export default function TestPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  if (isGrading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Grading Your Test</h2>
+            <p className="text-slate-600">AI is evaluating your answers. This may take a moment...</p>
+          </div>
         </div>
       </DashboardLayout>
     )
@@ -646,41 +704,146 @@ export default function TestPage() {
               </h3>
             </div>
 
-            {/* Answer Options */}
+            {/* Answer Input */}
             <div className="space-y-3 mb-6">
-              {currentQuestion.options.map((option, index) => {
-                const optionKey = String.fromCharCode(65 + index) // A, B, C, D
-                const isSelected = currentAnswer === optionKey
-                
-                return (
-                  <label
-                    key={index}
-                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                      isSelected
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={`question-${currentQuestion.id}`}
-                      value={optionKey}
-                      checked={isSelected}
-                      onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                      className="sr-only"
-                    />
-                    <div className="flex items-center space-x-3 w-full">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300'
-                      }`}>
-                        {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
-                      </div>
-                      <span className="font-medium text-slate-900">{optionKey}.</span>
-                      <span className="text-slate-700">{option}</span>
-                    </div>
-                  </label>
-                )
-              })}
+              {currentQuestion.questionType === 'mcq' || currentQuestion.questionType === 'multiple-choice' ? (
+                // MCQ Options
+                <div className="space-y-3">
+                  {currentQuestion.options.map((option, index) => {
+                    const optionKey = String.fromCharCode(65 + index) // A, B, C, D
+                    const isSelected = currentAnswer === optionKey
+                    
+                    return (
+                      <label
+                        key={index}
+                        className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name={`question-${currentQuestion.id}`}
+                          value={optionKey}
+                          checked={isSelected}
+                          onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                          className="sr-only"
+                        />
+                        <div className="flex items-center space-x-3 w-full">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                            isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300'
+                          }`}>
+                            {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                          </div>
+                          <span className="font-medium text-slate-900">{optionKey}.</span>
+                          <span className="text-slate-700">{option}</span>
+                        </div>
+                      </label>
+                    )
+                  })}
+                </div>
+              ) : currentQuestion.questionType === 'true-false' ? (
+                // True/False Options
+                <div className="space-y-3">
+                  {['True', 'False'].map((option, index) => {
+                    const isSelected = currentAnswer === option.toLowerCase()
+                    
+                    return (
+                      <label
+                        key={index}
+                        className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-50'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name={`question-${currentQuestion.id}`}
+                          value={option.toLowerCase()}
+                          checked={isSelected}
+                          onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                          className="sr-only"
+                        />
+                        <div className="flex items-center space-x-3 w-full">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                            isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-slate-300'
+                          }`}>
+                            {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                          </div>
+                          <span className="font-medium text-slate-900">{option}</span>
+                        </div>
+                      </label>
+                    )
+                  })}
+                </div>
+              ) : currentQuestion.questionType === 'short-answer' ? (
+                // Short Answer Input
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-700 font-medium mb-2">Short Answer Question</p>
+                    <p className="text-xs text-blue-600">Provide a brief answer (1-2 sentences)</p>
+                  </div>
+                  <textarea
+                    value={currentAnswer || ''}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                    placeholder="Type your answer here..."
+                    className="w-full p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-slate-900 placeholder:text-slate-400"
+                    rows={3}
+                  />
+                </div>
+              ) : currentQuestion.questionType === 'long-answer' ? (
+                // Long Answer Input
+                <div className="space-y-3">
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-700 font-medium mb-2">Long Answer Question</p>
+                    <p className="text-xs text-green-600">Provide a detailed explanation (2-3 paragraphs)</p>
+                  </div>
+                  <textarea
+                    value={currentAnswer || ''}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                    placeholder="Type your detailed answer here..."
+                    className="w-full p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-y text-slate-900 placeholder:text-slate-400"
+                    rows={6}
+                  />
+                </div>
+              ) : currentQuestion.questionType === 'essay' ? (
+                // Essay Input
+                <div className="space-y-3">
+                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <p className="text-sm text-purple-700 font-medium mb-2">Essay Question</p>
+                    <p className="text-xs text-purple-600">Write a comprehensive essay with proper structure and analysis</p>
+                  </div>
+                  <textarea
+                    value={currentAnswer || ''}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                    placeholder="Write your essay here..."
+                    className="w-full p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-y text-slate-900 placeholder:text-slate-400"
+                    rows={8}
+                  />
+                </div>
+              ) : currentQuestion.questionType === 'fill-blanks' ? (
+                // Fill in the Blanks Input
+                <div className="space-y-3">
+                  <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <p className="text-sm text-orange-700 font-medium mb-2">Fill in the Blanks</p>
+                    <p className="text-xs text-orange-600">Provide the missing word or phrase</p>
+                  </div>
+                  <input
+                    type="text"
+                    value={currentAnswer || ''}
+                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                    placeholder="Type your answer here..."
+                    className="w-full p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                  />
+                </div>
+              ) : (
+                // Default fallback for unknown question types
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-gray-600">This question type is not supported yet.</p>
+                </div>
+              )}
             </div>
 
             {/* No instant feedback - results shown after submission */}
