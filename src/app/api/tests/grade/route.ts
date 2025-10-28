@@ -10,6 +10,9 @@ interface GradingRequest {
   marks: number
   topic?: string
   difficulty?: string
+  markScheme?: string
+  specificMarkScheme?: string
+  subjectCode?: string
 }
 
 interface GradingResult {
@@ -52,7 +55,10 @@ export async function POST(request: NextRequest) {
       questionType,
       marks,
       topic,
-      difficulty
+      difficulty,
+      markScheme: body.markScheme,
+      specificMarkScheme: body.specificMarkScheme,
+      subjectCode: body.subjectCode
     })
 
     try {
@@ -139,7 +145,15 @@ export async function POST(request: NextRequest) {
 }
 
 function generateGradingPrompt(data: GradingRequest): string {
-  const { questionText, correctAnswer, userAnswer, questionType, marks, topic, difficulty } = data
+  const { questionText, correctAnswer, userAnswer, questionType, marks, topic, difficulty, markScheme, specificMarkScheme, subjectCode } = data
+
+  // Build mark scheme context
+  let markSchemeContext = ''
+  if (specificMarkScheme) {
+    markSchemeContext = `\n\nQUESTION-SPECIFIC MARK SCHEME:\n${specificMarkScheme}\n\nApply the above mark scheme precisely when grading this answer.`
+  } else if (markScheme) {
+    markSchemeContext = `\n\nSUBJECT MARK SCHEME:\n${markScheme}\n\nGrade according to the mark scheme guidelines.`
+  }
 
   return `You are an expert educational assessor. Please grade the following ${questionType} question.
 
@@ -148,7 +162,8 @@ CORRECT ANSWER: ${correctAnswer}
 STUDENT ANSWER: ${userAnswer}
 TOPIC: ${topic || 'General'}
 DIFFICULTY: ${difficulty || 'Medium'}
-MAXIMUM MARKS: ${marks}
+SUBJECT: ${subjectCode || 'Not specified'}
+MAXIMUM MARKS: ${marks}${markSchemeContext}
 
 Please provide a JSON response with the following structure:
 {
@@ -174,6 +189,7 @@ Consider:
 4. Clarity and organization (for longer answers)
 5. Use of appropriate terminology
 6. Depth of analysis (for essay questions)
+${markScheme ? '7. Adherence to mark scheme criteria' : ''}
 
 Provide constructive feedback that helps the student learn.`
 }

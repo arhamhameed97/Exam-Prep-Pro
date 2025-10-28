@@ -23,13 +23,19 @@ export interface GeneratedQuestion {
   difficulty: 'easy' | 'medium' | 'hard'
   topic: string
   questionType: string
+  isPastPaper?: boolean
+  pastPaperYear?: number
+  pastPaperMonth?: string
+  pastPaperVariant?: string
+  source?: 'ai' | 'past-paper'
+  specificMarkScheme?: string
 }
 
 export interface GeminiResponse {
   questions: GeneratedQuestion[]
 }
 
-export async function generateTestQuestions(request: TestGenerationRequest): Promise<GeneratedQuestion[]> {
+export async function generateTestQuestions(request: TestGenerationRequest, syllabus?: string, markScheme?: string): Promise<GeneratedQuestion[]> {
   // Check cache first
   const cachedQuestions = getCachedQuestions(request)
   if (cachedQuestions) {
@@ -63,7 +69,7 @@ export async function generateTestQuestions(request: TestGenerationRequest): Pro
         }
       })
       
-      const prompt = createOptimizedPrompt(request)
+      const prompt = createOptimizedPrompt(request, syllabus, markScheme)
       
       // Log token usage if enabled
       if (AI_CONFIG.tracking.logTokenUsage) {
@@ -213,7 +219,7 @@ export async function generateTestQuestions(request: TestGenerationRequest): Pro
   throw new Error('Failed to generate test questions. Please try again.')
 }
 
-function createOptimizedPrompt(request: TestGenerationRequest): string {
+function createOptimizedPrompt(request: TestGenerationRequest, syllabus?: string, markScheme?: string): string {
   const { subjectName, subjectLevel, numberOfQuestions, difficulty, topics, questionTypes } = request
   
   const topicsText = topics.join(', ')
@@ -228,12 +234,24 @@ function createOptimizedPrompt(request: TestGenerationRequest): string {
     return `${type}:${count}`
   }).join(', ')
   
+  // Build syllabus context if available
+  let syllabusContext = ''
+  if (syllabus && syllabus.trim() !== '') {
+    syllabusContext = `\n\nSYLLABUS CONTEXT:\n${syllabus}\n\nGenerate questions that align with the above syllabus specifications.`
+  }
+  
+  // Build mark scheme context if available
+  let markSchemeContext = ''
+  if (markScheme && markScheme.trim() !== '') {
+    markSchemeContext = `\n\nMARK SCHEME:\n${markScheme}\n\nEnsure questions are designed to be graded according to the above mark scheme guidelines.`
+  }
+  
   // Ultra-compact prompt to minimize tokens
   return `Create ${numberOfQuestions} ${difficulty} ${subjectLevel} ${subjectName} questions.
 
 Topics: ${topicsText}
 Required question types (must include ALL): ${typesText}
-Distribution: ${distribution}
+Distribution: ${distribution}${syllabusContext}${markSchemeContext}
 
 Rules:
 - ${subjectName} only
@@ -257,7 +275,9 @@ JSON format:
       "marks": 2,
       "difficulty": "${difficulty}",
       "topic": "topic name",
-      "questionType": "mcq" or "short-answer" or "long-answer" or "essay" or "true-false" or "fill-blanks"
+      "questionType": "mcq" or "short-answer" or "long-answer" or "essay" or "true-false" or "fill-blanks",
+      "isPastPaper": false,
+      "source": "ai"
     }
   ]
 }

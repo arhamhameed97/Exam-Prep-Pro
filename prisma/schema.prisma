@@ -61,16 +61,20 @@ model VerificationToken {
 }
 
 model Subject {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  level       String   @default("O-Level")
-  code        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tests       Test[]
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  level          String   @default("O-Level")
+  code           String
+  syllabus       String?
+  markScheme     String?
+  syllabusFile   String?
+  markSchemeFile String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tests          Test[]
 
   @@unique([code, userId])
   @@map("subjects")
@@ -117,19 +121,25 @@ model TestAttempt {
 }
 
 model Question {
-  id            String   @id @default(cuid())
-  questionText  String
-  options       String
-  correctAnswer String
-  explanation   String?
-  marks         Int      @default(1)
-  difficulty    String   @default("medium")
-  topic         String?
-  questionType  String   @default("mcq")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  testId        String
-  test          Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  id                 String   @id @default(cuid())
+  questionText       String
+  options            String
+  correctAnswer      String
+  explanation        String?
+  marks              Int      @default(1)
+  difficulty         String   @default("medium")
+  topic              String?
+  questionType       String   @default("mcq")
+  isPastPaper        Boolean  @default(false)
+  pastPaperYear      Int?
+  pastPaperMonth     String?
+  pastPaperVariant   String?
+  source             String   @default("ai")
+  specificMarkScheme String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  testId             String
+  test               Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
 
   @@map("questions")
 }

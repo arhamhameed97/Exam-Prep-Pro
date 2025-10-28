@@ -1,5 +1,16 @@
 export type QuestionType = 'mcq' | 'short-answer' | 'long-answer' | 'essay' | 'true-false' | 'fill-blanks'
 
+export interface PastPaperMetadata {
+  year: number
+  month: string
+  variant?: string
+}
+
+export interface QuestionSource {
+  type: 'ai' | 'past-paper'
+  pastPaperMetadata?: PastPaperMetadata
+}
+
 export interface Question {
   id: string
   questionText: string
@@ -10,6 +21,12 @@ export interface Question {
   difficulty: 'easy' | 'medium' | 'hard'
   topic?: string
   questionType: QuestionType
+  isPastPaper?: boolean
+  pastPaperYear?: number
+  pastPaperMonth?: string
+  pastPaperVariant?: string
+  source?: 'ai' | 'past-paper'
+  specificMarkScheme?: string
   cacheKey?: string
   timesReused: number
   testId: string
@@ -55,6 +72,8 @@ export interface TestGenerationRequest {
   topics: string[]
   questionTypes: QuestionType[]
   duration?: number
+  includePastPapers?: boolean
+  pastPaperRatio?: number // 0 to 1
 }
 
 export interface TestGenerationResponse {

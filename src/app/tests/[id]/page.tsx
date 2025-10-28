@@ -63,6 +63,7 @@ export default function TestPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const [isTestCompleted, setIsTestCompleted] = useState(false)
   const [testResult, setTestResult] = useState<TestResult | null>(null)
+  const [detailedResults, setDetailedResults] = useState<any[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isGrading, setIsGrading] = useState(false)
@@ -299,6 +300,7 @@ export default function TestPage() {
           }
           
           setTestResult(finalTestResult)
+          setDetailedResults(responseData.detailedResults)
         } else {
           // Fallback to MCQ score only
           const percentage = (result.score / result.totalMarks) * 100
@@ -355,6 +357,7 @@ export default function TestPage() {
     setIsTimerRunning(false)
     setIsTestCompleted(false)
     setTestResult(null)
+    setDetailedResults(null)
     // Clear the viewResults query parameter
     const url = new URL(window.location.href)
     url.searchParams.delete('viewResults')
@@ -495,7 +498,19 @@ export default function TestPage() {
             <div className="space-y-6">
               {test.questions.map((question, index) => {
                 const userAnswer = answers[question.id]
-                const isCorrect = userAnswer === question.correctAnswer
+                
+                // Get detailed results if available
+                const detailedResult = detailedResults?.find((r: any) => r.questionId === question.id)
+                
+                // For MCQ questions, use simple correct/incorrect check
+                const isMCQ = question.questionType === 'mcq' || question.questionType === 'true-false'
+                const isCorrect = isMCQ ? userAnswer === question.correctAnswer : (detailedResult?.isCorrect ?? false)
+                
+                // Get score and grade from detailed results
+                const score = detailedResult?.score ?? (isCorrect ? question.marks : 0)
+                const maxScore = detailedResult?.maxScore ?? question.marks
+                const grade = detailedResult?.grade ?? 'F'
+                const feedback = detailedResult?.feedback ?? ''
                 
                 // Handle different question types for answer display
                 let userAnswerText = "Not answered"
@@ -541,12 +556,28 @@ export default function TestPage() {
                           <span className="text-sm text-slate-600">{question.marks} marks</span>
                         </div>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        isCorrect 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {isCorrect ? 'Correct' : 'Incorrect'}
+                      <div className="flex items-center space-x-3">
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          isCorrect 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {isCorrect ? 'Correct' : 'Incorrect'}
+                        </div>
+                        {/* Display score and grade */}
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-slate-900">{score} / {maxScore} marks</div>
+                          <div className={`text-xs font-semibold ${
+                            grade === 'A+' ? 'text-green-600' :
+                            grade === 'A' ? 'text-green-500' :
+                            grade === 'B' ? 'text-blue-600' :
+                            grade === 'C' ? 'text-yellow-600' :
+                            grade === 'D' ? 'text-orange-600' :
+                            'text-red-600'
+                          }`}>
+                            Grade: {grade}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -588,7 +619,18 @@ export default function TestPage() {
                       </div>
                     </div>
 
-                    {question.explanation && (
+                    {/* AI Feedback for non-MCQ questions */}
+                    {feedback && !isMCQ && (
+                      <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg mb-4">
+                        <h5 className="font-semibold text-slate-900 mb-2 flex items-center space-x-2">
+                          <Trophy className="h-4 w-4 text-purple-600" />
+                          <span>AI Feedback</span>
+                        </h5>
+                        <p className="text-slate-700 whitespace-pre-wrap">{feedback}</p>
+                      </div>
+                    )}
+
+                    {question.explanation && !feedback && (
                       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <h5 className="font-semibold text-slate-900 mb-2 flex items-center space-x-2">
                           <AlertCircle className="h-4 w-4 text-blue-600" />

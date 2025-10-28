@@ -17,6 +17,12 @@ export interface SecureQuestionData {
   difficulty: string
   topic: string | null
   explanation: string | null
+  isPastPaper?: boolean
+  pastPaperYear?: number | null
+  pastPaperMonth?: string | null
+  pastPaperVariant?: string | null
+  source?: string
+  specificMarkScheme?: string | null
 }
 
 /**
@@ -64,7 +70,13 @@ export function prepareSecureQuestionData(question: Question): SecureQuestionDat
     marks: question.marks,
     difficulty: question.difficulty,
     topic: question.topic || null,
-    explanation: question.explanation || null
+    explanation: question.explanation || null,
+    isPastPaper: question.isPastPaper,
+    pastPaperYear: question.pastPaperYear || null,
+    pastPaperMonth: question.pastPaperMonth || null,
+    pastPaperVariant: question.pastPaperVariant || null,
+    source: question.source,
+    specificMarkScheme: question.specificMarkScheme || null
   }
 }
 

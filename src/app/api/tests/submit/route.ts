@@ -33,7 +33,14 @@ export async function POST(request: NextRequest) {
         userId: (session as { user: { id: string } }).user.id
       },
       include: {
-        questions: true
+        questions: true,
+        subject: {
+          select: {
+            code: true,
+            name: true,
+            markScheme: true
+          }
+        }
       }
     })
 
@@ -51,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     if (questions && questions.length > 0) {
       try {
-        const gradingResults = await gradeNonMCQQuestions(questions, answers)
+        const gradingResults = await gradeNonMCQQuestions(questions, answers, test.subject)
         finalScore = gradingResults.totalScore
         finalGrade = calculateOverallGrade(finalScore, test.totalMarks)
         detailedResults = gradingResults.detailedResults
@@ -91,7 +98,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper function to grade non-MCQ questions using AI
-async function gradeNonMCQQuestions(questions: any[], answers: { [questionId: string]: string }) {
+async function gradeNonMCQQuestions(questions: any[], answers: { [questionId: string]: string }, subject?: { code: string; name: string; markScheme: string | null }) {
   const detailedResults: any[] = []
   let totalScore = 0
   let mcqScore = 0
@@ -141,7 +148,10 @@ async function gradeNonMCQQuestions(questions: any[], answers: { [questionId: st
             questionType: question.questionType,
             marks: question.marks,
             topic: question.topic,
-            difficulty: question.difficulty
+            difficulty: question.difficulty,
+            markScheme: subject?.markScheme || undefined,
+            specificMarkScheme: question.specificMarkScheme,
+            subjectCode: subject?.code
           })
         })
 
