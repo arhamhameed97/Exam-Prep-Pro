@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { subjectCode, level = "O-Level" } = body
+    const { subjectCode, level = "O-Level", examBoard } = body
 
     if (!subjectCode) {
       return NextResponse.json({ message: "Subject code is required" }, { status: 400 })
@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
         code: subjectData.code,
         description: subjectData.description,
         level,
+        examBoard: examBoard || null,
         userId: (session as { user: { id: string } }).user.id
       }
     })

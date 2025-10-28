@@ -13,14 +13,18 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const subjectCode = searchParams.get('subjectCode')
+    const userId = (session as { user: { id: string } }).user.id
 
     if (!subjectCode) {
       return NextResponse.json({ error: 'Subject code is required' }, { status: 400 })
     }
 
-    // Find the subject by code
+    // Find the subject by code and userId to ensure it belongs to the user
     const subject = await prisma.subject.findFirst({
-      where: { code: subjectCode }
+      where: { 
+        code: subjectCode,
+        userId: userId
+      }
     })
 
     if (!subject) {
@@ -30,7 +34,7 @@ export async function GET(request: NextRequest) {
     // Fetch test attempts for this subject
     const attempts = await prisma.testAttempt.findMany({
       where: {
-        userId: (session as { user: { id: string } }).user.id,
+        userId: userId,
         test: {
           subjectId: subject.id
         },

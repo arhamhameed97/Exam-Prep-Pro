@@ -35,7 +35,7 @@ export interface GeminiResponse {
   questions: GeneratedQuestion[]
 }
 
-export async function generateTestQuestions(request: TestGenerationRequest, syllabus?: string, markScheme?: string): Promise<GeneratedQuestion[]> {
+export async function generateTestQuestions(request: TestGenerationRequest, syllabus?: string, markScheme?: string, examBoard?: string): Promise<GeneratedQuestion[]> {
   // Check cache first
   const cachedQuestions = getCachedQuestions(request)
   if (cachedQuestions) {
@@ -69,7 +69,7 @@ export async function generateTestQuestions(request: TestGenerationRequest, syll
         }
       })
       
-      const prompt = createOptimizedPrompt(request, syllabus, markScheme)
+      const prompt = createOptimizedPrompt(request, syllabus, markScheme, examBoard)
       
       // Log token usage if enabled
       if (AI_CONFIG.tracking.logTokenUsage) {
@@ -219,7 +219,7 @@ export async function generateTestQuestions(request: TestGenerationRequest, syll
   throw new Error('Failed to generate test questions. Please try again.')
 }
 
-function createOptimizedPrompt(request: TestGenerationRequest, syllabus?: string, markScheme?: string): string {
+function createOptimizedPrompt(request: TestGenerationRequest, syllabus?: string, markScheme?: string, examBoard?: string): string {
   const { subjectName, subjectLevel, numberOfQuestions, difficulty, topics, questionTypes } = request
   
   const topicsText = topics.join(', ')
@@ -233,6 +233,12 @@ function createOptimizedPrompt(request: TestGenerationRequest, syllabus?: string
     const count = index < extraQuestions ? questionsPerType + 1 : questionsPerType
     return `${type}:${count}`
   }).join(', ')
+  
+  // Build exam board context if available
+  let examBoardContext = ''
+  if (examBoard && examBoard.trim() !== '') {
+    examBoardContext = `\n\nEXAM BOARD CONTEXT:\nExam Board: ${examBoard}\nLevel: ${subjectLevel}\n\nGenerate questions that are tailored to ${examBoard} ${subjectLevel} standards and expectations. Consider ${examBoard}'s typical question style, marking approach, and curriculum emphasis for ${subjectName} at ${subjectLevel} level.`
+  }
   
   // Build syllabus context if available
   let syllabusContext = ''
@@ -251,7 +257,7 @@ function createOptimizedPrompt(request: TestGenerationRequest, syllabus?: string
 
 Topics: ${topicsText}
 Required question types (must include ALL): ${typesText}
-Distribution: ${distribution}${syllabusContext}${markSchemeContext}
+Distribution: ${distribution}${examBoardContext}${syllabusContext}${markSchemeContext}
 
 Rules:
 - ${subjectName} only

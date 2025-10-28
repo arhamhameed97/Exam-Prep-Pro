@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
           select: {
             code: true,
             name: true,
-            markScheme: true
+            markScheme: true,
+            examBoard: true,
+            level: true
           }
         }
       }
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper function to grade non-MCQ questions using AI
-async function gradeNonMCQQuestions(questions: any[], answers: { [questionId: string]: string }, subject?: { code: string; name: string; markScheme: string | null }) {
+async function gradeNonMCQQuestions(questions: any[], answers: { [questionId: string]: string }, subject?: { code: string; name: string; markScheme: string | null; examBoard: string | null; level: string | null }) {
   const detailedResults: any[] = []
   let totalScore = 0
   let mcqScore = 0
@@ -151,7 +153,9 @@ async function gradeNonMCQQuestions(questions: any[], answers: { [questionId: st
             difficulty: question.difficulty,
             markScheme: subject?.markScheme || undefined,
             specificMarkScheme: question.specificMarkScheme,
-            subjectCode: subject?.code
+            subjectCode: subject?.code,
+            examBoard: subject?.examBoard || undefined,
+            subjectLevel: subject?.level || undefined
           })
         })
 

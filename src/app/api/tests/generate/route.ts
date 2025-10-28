@@ -96,9 +96,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Extract syllabus and mark scheme from subject
+    // Extract syllabus, mark scheme, and exam board from subject
     const syllabus = subject.syllabus
     const markScheme = subject.markScheme
+    const examBoard = subject.examBoard
 
     // Calculate duration if not provided (1 minute per question + 10 minutes buffer)
     const calculatedDuration = duration || (numberOfQuestions + 10)
@@ -123,10 +124,11 @@ export async function POST(request: NextRequest) {
     // Generate questions using Gemini API
     let questions
     try {
-      // Only pass syllabus/mark scheme if they have content
+      // Only pass syllabus/mark scheme/exam board if they have content
       const syllabusToPass = syllabus && syllabus.trim() !== '' ? syllabus : undefined
       const markSchemeToPass = markScheme && markScheme.trim() !== '' ? markScheme : undefined
-      questions = await generateTestQuestions(body, syllabusToPass, markSchemeToPass)
+      const examBoardToPass = examBoard && examBoard.trim() !== '' ? examBoard : undefined
+      questions = await generateTestQuestions(body, syllabusToPass, markSchemeToPass, examBoardToPass)
     } catch (error) {
       console.error('Gemini API error:', error)
       // Throw error instead of generating questions

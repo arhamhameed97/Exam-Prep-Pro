@@ -33,8 +33,9 @@ import {
   Laptop
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Eye, Calendar, Trophy, CheckCircle } from "lucide-react"
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 // Subject data mapping
 const subjectData: Record<string, { name: string; code: string; level: string; description: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
@@ -148,17 +149,120 @@ export default function SubjectPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [testAttempts, setTestAttempts] = useState<TestAttempt[]>([])
   const [loading, setLoading] = useState(false)
+  const [analytics, setAnalytics] = useState<any>(null)
+
+  const groupTestsByMonth = useCallback((attempts: TestAttempt[]) => {
+    const grouped = attempts.reduce((acc, attempt) => {
+      const date = new Date(attempt.completedAt)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      if (!acc[monthKey]) {
+        acc[monthKey] = []
+      }
+      acc[monthKey].push(attempt)
+      return acc
+    }, {} as Record<string, TestAttempt[]>)
+
+    return Object.entries(grouped).map(([month, tests]) => ({
+      month,
+      count: tests.length,
+      avgScore: Math.round((tests.reduce((sum, t) => sum + t.score, 0) / tests.reduce((sum, t) => sum + t.test.totalMarks, 0)) * 100)
+    })).sort((a, b) => a.month.localeCompare(b.month))
+  }, [])
+
+  const calculateAnalytics = useCallback((attempts: TestAttempt[]) => {
+    if (!attempts || attempts.length === 0) {
+      setAnalytics(null)
+      return
+    }
+
+    const totalTests = attempts.length
+    const totalScore = attempts.reduce((sum, attempt) => sum + attempt.score, 0)
+    const totalMarks = attempts.reduce((sum, attempt) => sum + attempt.test.totalMarks, 0)
+    const averageScore = (totalScore / totalMarks) * 100
+
+    // Calculate grade distribution for chart
+    const gradeCounts = attempts.reduce((acc, attempt) => {
+      acc[attempt.grade] = (acc[attempt.grade] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    // Convert to chart format
+    const gradeChartData = Object.entries(gradeCounts).map(([grade, count]) => ({
+      name: grade,
+      value: count,
+      color: getGradeColor(grade)
+    })).sort((a, b) => {
+      const order = ['A+', 'A', 'B', 'C', 'D', 'F']
+      return order.indexOf(a.name) - order.indexOf(b.name)
+    })
+
+    // Calculate performance over time (for line chart)
+    const performanceOverTime = attempts.map((attempt, index) => ({
+      test: `Test ${totalTests - index}`,
+      score: Math.round((attempt.score / attempt.test.totalMarks) * 100),
+      date: new Date(attempt.completedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    })).reverse()
+
+    // Calculate trend (comparing last 5 tests with previous 5)
+    const recentTests = attempts.slice(0, 5)
+    const previousTests = attempts.slice(5, 10)
+    const recentAvg = recentTests.length > 0 
+      ? (recentTests.reduce((sum, t) => sum + t.score, 0) / recentTests.reduce((sum, t) => sum + t.test.totalMarks, 0)) * 100
+      : 0
+    const previousAvg = previousTests.length > 0
+      ? (previousTests.reduce((sum, t) => sum + t.score, 0) / previousTests.reduce((sum, t) => sum + t.test.totalMarks, 0)) * 100
+      : 0
+
+    const bestTest = attempts.reduce((best, current) => {
+      const currentPercentage = (current.score / current.test.totalMarks) * 100
+      const bestPercentage = (best.score / best.test.totalMarks) * 100
+      return currentPercentage > bestPercentage ? current : best
+    })
+
+    // Calculate average time per test
+    const avgTimePerTest = Math.round(attempts.reduce((sum, a) => sum + a.timeSpent, 0) / totalTests)
+
+    setAnalytics({
+      totalTests,
+      averageScore: Math.round(averageScore),
+      gradeDistribution: gradeCounts,
+      gradeChartData,
+      performanceOverTime,
+      trend: recentAvg - previousAvg,
+      bestTest,
+      totalTimeSpent: attempts.reduce((sum, a) => sum + a.timeSpent, 0),
+      avgTimePerTest,
+      testsByMonth: groupTestsByMonth(attempts)
+    })
+  }, [groupTestsByMonth])
+
+  const getGradeColor = (grade: string) => {
+    const colors: Record<string, string> = {
+      'A+': '#10b981',
+      'A': '#22c55e',
+      'B': '#3b82f6',
+      'C': '#f59e0b',
+      'D': '#ef4444',
+      'F': '#dc2626'
+    }
+    return colors[grade] || '#94a3b8'
+  }
 
   // Fetch test attempts for this subject
   useEffect(() => {
     const fetchTestAttempts = async () => {
-      if (activeTab === 'tests' || activeTab === 'overview') {
+      if (activeTab === 'tests' || activeTab === 'overview' || activeTab === 'analytics') {
         setLoading(true)
         try {
           const response = await fetch(`/api/tests/attempts?subjectCode=${code}`)
           if (response.ok) {
             const data = await response.json()
             setTestAttempts(data.attempts || [])
+            
+            // Calculate analytics if we have attempts
+            if (data.attempts && data.attempts.length > 0 && activeTab === 'analytics') {
+              calculateAnalytics(data.attempts)
+            }
           }
         } catch (error) {
           console.error('Error fetching test attempts:', error)
@@ -169,7 +273,7 @@ export default function SubjectPage() {
     }
 
     fetchTestAttempts()
-  }, [activeTab, code])
+  }, [activeTab, code, calculateAnalytics])
 
   const handleViewResults = (attempt: { test: { id: string }; id: string }) => {
     router.push(`/tests/${attempt.test.id}?viewResults=${attempt.id}`)
@@ -402,10 +506,261 @@ export default function SubjectPage() {
             )}
 
             {activeTab === 'analytics' && (
-              <div className="text-center py-12">
-                <TrendingUp className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Analytics Dashboard</h3>
-                <p className="text-slate-600">Your performance analytics will appear here once you start taking tests.</p>
+              <div className="space-y-6">
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent mx-auto mb-4"></div>
+                    <p className="text-slate-600">Loading analytics...</p>
+                  </div>
+                ) : !analytics || analytics.totalTests === 0 ? (
+                  <div className="text-center py-12">
+                    <TrendingUp className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Analytics Dashboard</h3>
+                    <p className="text-slate-600">Your performance analytics will appear here once you start taking tests.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Overview Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium text-slate-700">Total Tests</h3>
+                          <TestTube className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <p className="text-3xl font-bold text-blue-900">{analytics.totalTests}</p>
+                        <p className="text-sm text-slate-600 mt-1">completed</p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium text-slate-700">Average Score</h3>
+                          <Trophy className="h-5 w-5 text-green-600" />
+                        </div>
+                        <p className="text-3xl font-bold text-green-900">{analytics.averageScore}%</p>
+                        <p className="text-sm text-slate-600 mt-1">overall performance</p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium text-slate-700">Best Score</h3>
+                          <Trophy className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <p className="text-3xl font-bold text-purple-900">
+                          {Math.round((analytics.bestTest.score / analytics.bestTest.test.totalMarks) * 100)}%
+                        </p>
+                        <p className="text-sm text-slate-600 mt-1">highest achieved</p>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-6 border border-orange-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-medium text-slate-700">Avg Time</h3>
+                          <Clock className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <p className="text-3xl font-bold text-orange-900">{analytics.avgTimePerTest}</p>
+                        <p className="text-sm text-slate-600 mt-1">minutes per test</p>
+                      </div>
+                    </div>
+
+                    {/* Performance Trend Chart */}
+                    <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-900">Performance Trend</h3>
+                        <div className="flex items-center space-x-2 text-sm text-slate-600">
+                          <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                          <span>Score over time</span>
+                        </div>
+                      </div>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={analytics.performanceOverTime}>
+                          <defs>
+                            <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                          <XAxis 
+                            dataKey="date" 
+                            stroke="#64748b"
+                            style={{ fontSize: '12px' }}
+                          />
+                          <YAxis 
+                            stroke="#64748b"
+                            style={{ fontSize: '12px' }}
+                            domain={[0, 100]}
+                            tickFormatter={(value) => `${value}%`}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'white', 
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              padding: '8px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            }}
+                            formatter={(value: number) => [`${value}%`, 'Score']}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="score" 
+                            stroke="#6366f1" 
+                            strokeWidth={3}
+                            dot={{ fill: '#6366f1', r: 5, strokeWidth: 2, stroke: '#fff' }}
+                            activeDot={{ r: 8, strokeWidth: 2 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Grade Distribution Pie Chart */}
+                      <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+                        <h3 className="text-lg font-semibold text-slate-900 mb-4">Grade Distribution</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                            <Pie
+                              data={analytics.gradeChartData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              outerRadius={90}
+                              fill="#8884d8"
+                              dataKey="value"
+                              stroke="white"
+                              strokeWidth={2}
+                            >
+                              {analytics.gradeChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip 
+                              contentStyle={{ 
+                                backgroundColor: 'white', 
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '8px',
+                                padding: '8px',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                              }}
+                            />
+                            <Legend 
+                              verticalAlign="bottom" 
+                              height={36}
+                              iconType="circle"
+                              formatter={(value: string) => value}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Monthly Performance Bar Chart */}
+                      <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-slate-900">Monthly Performance</h3>
+                          <div className="flex items-center space-x-2 text-sm text-slate-600">
+                            <div className="w-3 h-3 rounded bg-indigo-500"></div>
+                            <span>Average score</span>
+                          </div>
+                        </div>
+                        {analytics.testsByMonth.length > 0 ? (
+                          <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={analytics.testsByMonth}>
+                              <defs>
+                                <linearGradient id="colorAvgScore" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.3}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                              <XAxis 
+                                dataKey="month" 
+                                stroke="#64748b"
+                                style={{ fontSize: '12px' }}
+                                tickFormatter={(value) => new Date(value + '-01').toLocaleDateString('en-US', { month: 'short' })}
+                              />
+                              <YAxis 
+                                stroke="#64748b"
+                                style={{ fontSize: '12px' }}
+                                domain={[0, 100]}
+                                tickFormatter={(value) => `${value}%`}
+                              />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'white', 
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: '8px',
+                                  padding: '8px',
+                                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                }}
+                                formatter={(value: number) => [`${value}%`, 'Average Score']}
+                                labelFormatter={(value) => new Date(value + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                              />
+                              <Bar 
+                                dataKey="avgScore" 
+                                fill="url(#colorAvgScore)"
+                                radius={[8, 8, 0, 0]}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        ) : (
+                          <div className="flex items-center justify-center h-[300px] text-slate-500">
+                            <p>No monthly data available</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Grade Breakdown Cards */}
+                    <div className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4">Grade Breakdown</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {Object.entries(analytics.gradeDistribution).map(([grade, count]) => {
+                          const gradeColor = getGradeColor(grade)
+                          return (
+                            <div key={grade} className="relative overflow-hidden text-center p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-300 transition-all group">
+                              <div className="absolute top-0 right-0 w-16 h-16 opacity-10" style={{ background: gradeColor, borderRadius: '0 0 0 100%' }}></div>
+                              <div className="text-4xl font-bold mb-2" style={{ color: gradeColor }}>{grade}</div>
+                              <div className="text-lg font-semibold text-slate-700">{count as number}</div>
+                              <div className="text-xs text-slate-500 mt-1">test{(count as number) > 1 ? 's' : ''}</div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Performance Trend Indicator */}
+                    {analytics.trend !== 0 && (
+                      <div className={`rounded-lg p-6 border ${
+                        analytics.trend > 0 
+                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200' 
+                          : 'bg-gradient-to-r from-red-50 to-rose-50 border-red-200'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className={`p-3 rounded-lg ${
+                              analytics.trend > 0 ? 'bg-green-100' : 'bg-red-100'
+                            }`}>
+                              <TrendingUp className={`h-8 w-8 ${
+                                analytics.trend > 0 ? 'text-green-600' : 'text-red-600 transform rotate-180'
+                              }`} />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                                Performance Trend
+                              </h3>
+                              <p className={`text-sm font-medium ${
+                                analytics.trend > 0 ? 'text-green-700' : 'text-red-700'
+                              }`}>
+                                {analytics.trend > 0 ? '↑' : '↓'} {Math.abs(analytics.trend).toFixed(1)}% 
+                                {analytics.trend > 0 ? ' improvement' : ' decline'} compared to previous tests
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

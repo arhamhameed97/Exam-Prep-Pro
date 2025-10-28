@@ -13,6 +13,8 @@ interface GradingRequest {
   markScheme?: string
   specificMarkScheme?: string
   subjectCode?: string
+  examBoard?: string
+  subjectLevel?: string
 }
 
 interface GradingResult {
@@ -58,7 +60,9 @@ export async function POST(request: NextRequest) {
       difficulty,
       markScheme: body.markScheme,
       specificMarkScheme: body.specificMarkScheme,
-      subjectCode: body.subjectCode
+      subjectCode: body.subjectCode,
+      examBoard: body.examBoard,
+      subjectLevel: body.subjectLevel
     })
 
     try {
@@ -145,7 +149,13 @@ export async function POST(request: NextRequest) {
 }
 
 function generateGradingPrompt(data: GradingRequest): string {
-  const { questionText, correctAnswer, userAnswer, questionType, marks, topic, difficulty, markScheme, specificMarkScheme, subjectCode } = data
+  const { questionText, correctAnswer, userAnswer, questionType, marks, topic, difficulty, markScheme, specificMarkScheme, subjectCode, examBoard, subjectLevel } = data
+
+  // Build exam board context
+  let examBoardContext = ''
+  if (examBoard && examBoard.trim() !== '' && subjectLevel) {
+    examBoardContext = `\n\nEXAM BOARD CONTEXT:\nExam Board: ${examBoard}\nLevel: ${subjectLevel}\n\nProvide feedback and grading based on ${examBoard} ${subjectLevel} standards. Consider ${examBoard}'s typical marking criteria, expectations, and feedback style.`
+  }
 
   // Build mark scheme context
   let markSchemeContext = ''
@@ -155,7 +165,7 @@ function generateGradingPrompt(data: GradingRequest): string {
     markSchemeContext = `\n\nSUBJECT MARK SCHEME:\n${markScheme}\n\nGrade according to the mark scheme guidelines.`
   }
 
-  return `You are an expert educational assessor. Please grade the following ${questionType} question.
+  return `You are an expert educational assessor. Please grade the following ${questionType} question.${examBoardContext}
 
 QUESTION: ${questionText}
 CORRECT ANSWER: ${correctAnswer}
