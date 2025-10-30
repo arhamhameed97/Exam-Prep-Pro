@@ -17,7 +17,7 @@ const nextConfig = {
   
   // Enable experimental features for better performance
   experimental: {
-    optimizePackageImports: ['lucide-react', '@prisma/client', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast'],
   },
 
   // Turbopack configuration
