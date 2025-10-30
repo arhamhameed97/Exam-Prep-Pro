@@ -10,6 +10,13 @@ if (!process.env.DATABASE_URL) {
   console.error('Environment variables:', Object.keys(process.env).filter(key => key.includes('DATABASE')))
 }
 
+// Log Prisma engine type (safe)
+if (process.env.NODE_ENV === 'production') {
+  const engineType = process.env.PRISMA_CLIENT_ENGINE_TYPE || 'binary'
+  const urlScheme = (process.env.DATABASE_URL || '').split(':')[0] || ''
+  console.log('[prisma:init] engineType=%s urlScheme=%s hasUrl=%s', engineType, urlScheme, Boolean(process.env.DATABASE_URL))
+}
+
 // Configure Prisma for Neon connection pooling and Vercel serverless
 const prismaClientConfig = {
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
